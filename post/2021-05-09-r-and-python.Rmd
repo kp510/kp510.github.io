@@ -44,3 +44,4 @@ print(r.part1,part2)
 cat(c(part1,py$part2))
 ```
 
+![](https://mir-s3-cdn-cf.behance.net/projects/max_808/cc5ba853065555.Y3JvcCw2MzQsNDk2LDYyOSwxNjI.png)
