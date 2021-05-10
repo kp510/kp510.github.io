@@ -8,7 +8,22 @@ hidediscus: True
 
 # What is the difference between R and Python?
 
-There are many types of coding languages out there each with their own strengths and drawbacks. R and Python are two popular and well known languages. R is often used for statistics and is used primarily in academic and research as it is great for data analysis. R is also great for people who have no coding experience. Python on the other hand is mainly used by programmers. It also has the ability to be used for other purposes beyond data analysis.
+There are many types of coding languages out there each with their own strengths and drawbacks. R and Python are two popular and well known languages. R is often used for statistics and is used primarily in academic and research as it is great for data analysis. R is also great for people who have no coding experience. Python on the other hand is mainly used by programmers. It also has the ability to be used for other purposes beyond data analysis. There is an example funtion in which it tells the user if the input string is a palindrome.
+
+```{python}
+def isPalindrome( s ):
+   """ Return True if string s is a palindrome and False
+   otherwise. Count the empty string as a palindrome. """
+   if len(s) <= 1:
+       return True
+   elif s[0] != s[len(s)-1]:
+       return False
+   else:
+       return isPalindrome(s[1:len(s)-1])
+       
+isPalindrome("hello")
+isPalindrome("racecar")
+```
 
 
 # So why use them together?

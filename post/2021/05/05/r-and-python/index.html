@@ -74,7 +74,21 @@
 
 <div id="what-is-the-difference-between-r-and-python" class="section level1">
 <h1>What is the difference between R and Python?</h1>
-<p>There are many types of coding languages out there each with their own strengths and drawbacks. R and Python are two popular and well known languages. R is often used for statistics and is used primarily in academic and research as it is great for data analysis. R is also great for people who have no coding experience. Python on the other hand is mainly used by programmers. It also has the ability to be used for other purposes beyond data analysis.</p>
+<p>There are many types of coding languages out there each with their own strengths and drawbacks. R and Python are two popular and well known languages. R is often used for statistics and is used primarily in academic and research as it is great for data analysis. R is also great for people who have no coding experience. Python on the other hand is mainly used by programmers. It also has the ability to be used for other purposes beyond data analysis. There is an example funtion in which it tells the user if the input string is a palindrome.</p>
+<pre class="python"><code>def isPalindrome( s ):
+   &quot;&quot;&quot; Return True if string s is a palindrome and False
+   otherwise. Count the empty string as a palindrome. &quot;&quot;&quot;
+   if len(s) &lt;= 1:
+       return True
+   elif s[0] != s[len(s)-1]:
+       return False
+   else:
+       return isPalindrome(s[1:len(s)-1])
+       
+isPalindrome(&quot;hello&quot;)</code></pre>
+<pre><code>## False</code></pre>
+<pre class="python"><code>isPalindrome(&quot;racecar&quot;)</code></pre>
+<pre><code>## True</code></pre>
 </div>
 <div id="so-why-use-them-together" class="section level1">
 <h1>So why use them together?</h1>
