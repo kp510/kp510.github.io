@@ -1,0 +1,32 @@
++++
+title = "Coding Languages: R and Python"
+description = "You can use them together!"
+tags = []
+categories = []
+---
+
+
+
+# What is the difference between R and Python?
+
+There are many types of coding languages out there each with their own strengths and drawbacks. R and Python are two popular and well known languages. R is often used for statistics and is used primarily in academic and research as it is great for data analysis. R is also great for people who have no coding experience. Python on the other hand is mainly used by programmers. It also has the ability to be used for other purposes beyond data analysis.
+
+
+# So why use them together?
+
+As mentioned before, each coding language has their own pros and cons. Using multiple together could be a great way to overcome any cons. Also, just like spoken language, you want to be able to speak to the language of those you are working with. Let's say you are working on a collaborative project and you are working in R and they are working in Python. It would be best to find a way to have R and Python work together in order for you to get the job done. Below is an example of R and Python working together.
+
+```{r}
+library(reticulate)
+part1<-"Thank you"
+```
+
+```{python}
+part2 = "for checking out my project!"
+print(r.part1,part2)
+```
+
+```{r}
+cat(c(part1,py$part2))
+```
+

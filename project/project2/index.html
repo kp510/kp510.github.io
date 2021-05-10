@@ -429,7 +429,7 @@ data %&gt;% group_by(Class) %&gt;%summarise(means = mean(MovementSpeed)) %&gt;% 
 ##       &lt;dbl&gt;
 ## 1      6.37</code></pre>
 <pre class="r"><code>mean(rand_dist &gt; 6.368421 | rand_dist &lt; -6.368421)</code></pre>
-<pre><code>## [1] 0.0074</code></pre>
+<pre><code>## [1] 0.005</code></pre>
 <p>Looking at the actual mean difference of MovementSpeed between Tanks and Support, it is a big enough number that I would assume it is significant. This was supported by the randomizaiton test as the resulting p-value was less than 0.05.</p>
 <pre class="r"><code>hist(rand_dist,main=&quot;&quot;,ylab=&quot;&quot;); abline(v = c(-6.368421, 6.368421),col=&quot;red&quot;)</code></pre>
 <p><img src="../../project/project2_files/figure-html/unnamed-chunk-16-1.png" width="768" style="display: block; margin: auto;" /></p>
@@ -538,11 +538,11 @@ ggplot() +geom_point(aes(fitvals, resids)) + geom_hline(yintercept=0, color =&qu
 samp_distn %&gt;% t %&gt;% as.data.frame %&gt;% summarize_all(sd) </code></pre>
 <pre><code>## (Intercept) Range_c ClassFighter ClassMage ClassMarksman
 ClassSupport ClassTank
-## 1 17.70199 0.09101393 17.92514 17.90779 18.12875 17.7661
-19.89666
+## 1 17.85901 0.09202067 18.08551 17.95744 18.32265
+17.93604 19.97349
 ## Range_c:ClassFighter Range_c:ClassMage
 Range_c:ClassMarksman Range_c:ClassSupport
-## 1 0.09229316 0.09151897 0.09259732 NA
+## 1 0.09328316 0.0929806 0.09320694 NA
 ## Range_c:ClassTank
 ## 1 NA</code></pre>
 </div>
