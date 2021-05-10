@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="author" content="Kim Phan" />
+    
+    <link rel="shortcut icon" type="image/x-icon" href="../../img/favicon.ico">
+    <title>Project 2: Modeling, Testing, and Predicting</title>
+    <meta name="generator" content="Hugo 0.83.1" />
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="../../css/main.css" />
+    <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" />
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:200,400,200bold,400old" />
+    
+    <!--[if lt IE 9]>
+			<script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+			<script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+		<![endif]-->
+
+    
+  </head>
+
+  <body>
+    <div id="wrap">
+      
+      <nav class="navbar navbar-default">
+  <div class="container">
+    <div class="navbar-header">
+      <a class="navbar-brand" href="../../"><i class="fa fa-home"></i></a>
+      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <div class="navbar-collapse collapse" id="navbar">
+      <ul class="nav navbar-nav navbar-right">
+      
+        
+        <li><a href="../../post/">BLOG</a></li>
+        
+        <li><a href="../../projects/">PROJECTS</a></li>
+        
+        <li><a href="../../resume/">RESUME</a></li>
+        
+      
+      </ul>
+    </div>
+  </div>
+</nav>
+
+      <div class="container">
+        <div class="blog-post">
+          <h3>
+            <strong><a href="../../project/project2/">Project 2: Modeling, Testing, and Predicting</a></strong>
+          </h3>
+        </div>
+ 
+<div class="blog-title">
+          <h4>
+         January 1, 0001 
+            &nbsp;&nbsp;
+            
+          </h4>
+        </div>
+
+        <div class="panel panel-default">
+          <div class="panel-body">
+            <div class="blogpost">
+              
+
+
+<div id="introduction-welcome-back-to-summoners-rift" class="section level1">
+<h1>Introduction: Welcome Back to Summoner’s Rift!</h1>
+<p>For review, League of Legends(LoL) is a team based multiplayer online battle arena game where two teams of 5 battle to see who destroys the base first. There are 5 positions corresponding to the 3 map lanes: Top, Mid, Bot(Support and Attack Damage Carry or ADC), and Jungle(they roam). Often the characters(Champions) have specific classes that are associated with the position they are suited for.</p>
+<div id="what-is-this-data" class="section level2">
+<h2>What Is This Data?</h2>
+<p>From the previous project, I had briefly seen trends in the base stats of the League of Legends(LoL) base game. However, due to the main purpose of the previous project being to compare LoL to it’s spin off Team Fight Tactics, I decided to analyze the base stats of the original game in more detail. For this project, I have 148 observations(Champions/Characters) and 12 variables. Champion is the name of the game character. Class is the type of style the champion plays as. Some champions even have a sub type which is stated in Subclass. In order to use abilities, some Champions must “pay” a certain resource such as mana or blood in order to use it. The type of Resource a Champion uses is stated in ResourceType and the base amount of Resource “storage” is measured in ResourcePool. Armor and SpellBlock are defense against physical and magic damage respectively. The rest of the variables are self explanitory as they are true to their name.</p>
+</div>
+<div id="pre-editing" class="section level2">
+<h2>Pre-editing</h2>
+<p>This is just some tidying/editing I had to do to my raw data in order to get variables I thought might be relevant to what I want to analyze. I also ran any packages I thought I might need later.</p>
+<pre class="r"><code>LoL_Champions_RawData &lt;- read_csv(&quot;LoL_Champions.csv&quot;)
+LoL_Champions &lt;- LoL_Champions_RawData %&gt;% select(Champion=id, Class=tags, ResourceType=partype, Hp=stats.hp, ResourcePool=stats.mp, MovementSpeed=stats.movespeed, Armor=stats.armor, SpellBlock=stats.spellblock, Range=stats.attackrange, Damage=stats.attackdamage, AttackSpeed=stats.attackspeed)
+LoL_Champions &lt;- LoL_Champions %&gt;% separate(Class, c(&quot;Class&quot;,&quot;Subclass&quot;), &#39;,&#39;)</code></pre>
+</div>
+</div>
+<div id="manova-and-anova" class="section level1">
+<h1>MANOVA and ANOVA</h1>
+<div id="overall-manova" class="section level2">
+<h2>Overall MANOVA</h2>
+<p>Once again, the main focus I want to look at is how base stats differ among classes. To test to see if at least one of the numeric stats differs by Class, I ran a MONOVA Test.</p>
+<pre class="r"><code>man1&lt;-manova(cbind(Hp, MovementSpeed, Armor, SpellBlock, Range, Damage, AttackSpeed)~Class, data=LoL_Champions)
+summary(man1)</code></pre>
+<pre><code>## Df Pillai approx F num Df den Df Pr(&gt;F)
+## Class 5 1.7302 10.583 35 700 &lt; 2.2e-16 ***
+## Residuals 142
+## ---
+## Signif. codes: 0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1
+&#39; &#39; 1</code></pre>
+<p><strong>Note: I did not include ResourcePool as based on my knowledge of the game RecourcePool is also determined by ResourceType while all the other stats are mostly determined by the Class.</strong></p>
+</div>
+<div id="univariate-anovas" class="section level2">
+<h2>Univariate ANOVAS</h2>
+<p>Since the overall MANOVA was significant it means that at least one base stat differs among Classes. To see which differs, I ran univariate ANOVAS.</p>
+<pre class="r"><code>summary.aov(man1)</code></pre>
+<pre><code>## Response Hp :
+## Df Sum Sq Mean Sq F value Pr(&gt;F)
+## Class 5 56470 11294.0 10.678 1.004e-08 ***
+## Residuals 142 150195 1057.7
+## ---
+## Signif. codes: 0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1
+&#39; &#39; 1
+##
+## Response MovementSpeed :
+## Df Sum Sq Mean Sq F value Pr(&gt;F)
+## Class 5 3715.5 743.10 23.165 &lt; 2.2e-16 ***
+## Residuals 142 4555.1 32.08
+## ---
+## Signif. codes: 0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1
+&#39; &#39; 1
+##
+## Response Armor :
+## Df Sum Sq Mean Sq F value Pr(&gt;F)
+## Class 5 3876.0 775.19 41.801 &lt; 2.2e-16 ***
+## Residuals 142 2633.3 18.54
+## ---
+## Signif. codes: 0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1
+&#39; &#39; 1
+##
+## Response SpellBlock :
+## Df Sum Sq Mean Sq F value Pr(&gt;F)
+## Class 5 140.72 28.144 17.192 2.808e-13 ***
+## Residuals 142 232.45 1.637
+## ---
+## Signif. codes: 0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1
+&#39; &#39; 1
+##
+## Response Range :
+## Df Sum Sq Mean Sq F value Pr(&gt;F)
+## Class 5 4694852 938970 135.48 &lt; 2.2e-16 ***
+## Residuals 142 984173 6931
+## ---
+## Signif. codes: 0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1
+&#39; &#39; 1
+##
+## Response Damage :
+## Df Sum Sq Mean Sq F value Pr(&gt;F)
+## Class 5 3001.1 600.21 33.691 &lt; 2.2e-16 ***
+## Residuals 142 2529.8 17.82
+## ---
+## Signif. codes: 0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1
+&#39; &#39; 1
+##
+## Response AttackSpeed :
+## Df Sum Sq Mean Sq F value Pr(&gt;F)
+## Class 5 0.022189 0.0044378 4.0269 0.001902 **
+## Residuals 142 0.156492 0.0011021
+## ---
+## Signif. codes: 0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1
+&#39; &#39; 1</code></pre>
+</div>
+<div id="post-hoc-t-tests" class="section level2">
+<h2>Post-hoc T-Tests</h2>
+<p>After the ANOVA test, it appears that all stats have a significant difference across Class. In order to see which Classes differ for which stats, pairwise t-tests were performed. A total of 113 tests was done ( 1MANOVA, 7ANOVA, 105 T-tests).</p>
+<pre class="r"><code>pairwise.t.test(LoL_Champions$Hp, LoL_Champions$Class, p.adj=&quot;none&quot;)</code></pre>
+<pre><code>## 
+##  Pairwise comparisons using t tests with pooled SD 
+## 
+## data:  LoL_Champions$Hp and LoL_Champions$Class 
+## 
+##          Assassin Fighter Mage    Marksman Support
+## Fighter  0.61445  -       -       -        -      
+## Mage     6.7e-06  2.1e-07 -       -        -      
+## Marksman 0.00027  6.7e-05 0.41370 -        -      
+## Support  0.00132  0.00085 0.42901 0.93460  -      
+## Tank     0.71026  0.93549 1.4e-05 0.00060  0.00279
+## 
+## P value adjustment method: none</code></pre>
+<pre class="r"><code>pairwise.t.test(LoL_Champions$MovementSpeed, LoL_Champions$Class, p.adj=&quot;none&quot;)</code></pre>
+<pre><code>##
+## Pairwise comparisons using t tests with pooled SD
+##
+## data: LoL_Champions$MovementSpeed and
+LoL_Champions$Class
+##
+## Assassin Fighter Mage Marksman Support
+## Fighter 0.7601 - - - -
+## Mage 2.4e-05 1.1e-08 - - -
+## Marksman 1.6e-10 1.3e-15 0.0011 - -
+## Support 7.2e-07 1.4e-09 0.0879 0.2753 -
+## Tank 0.0307 0.0033 0.0425 3.4e-06 0.0014
+##
+## P value adjustment method: none</code></pre>
+<pre class="r"><code>pairwise.t.test(LoL_Champions$Armor, LoL_Champions$Class, p.adj=&quot;none&quot;)</code></pre>
+<pre><code>## 
+##  Pairwise comparisons using t tests with pooled SD 
+## 
+## data:  LoL_Champions$Armor and LoL_Champions$Class 
+## 
+##          Assassin Fighter Mage    Marksman Support
+## Fighter  0.00010  -       -       -        -      
+## Mage     1.7e-07  &lt; 2e-16 -       -        -      
+## Marksman 0.04348  4.4e-11 0.00021 -        -      
+## Support  0.02570  0.22448 4.3e-13 1.7e-05  -      
+## Tank     2.8e-05  0.29479 &lt; 2e-16 1.4e-10  0.05805
+## 
+## P value adjustment method: none</code></pre>
+<pre class="r"><code>pairwise.t.test(LoL_Champions$SpellBlock, LoL_Champions$Class, p.adj=&quot;none&quot;)</code></pre>
+<pre><code>## 
+##  Pairwise comparisons using t tests with pooled SD 
+## 
+## data:  LoL_Champions$SpellBlock and LoL_Champions$Class 
+## 
+##          Assassin Fighter Mage    Marksman Support
+## Fighter  0.08480  -       -       -        -      
+## Mage     9.6e-09  5.1e-08 -       -        -      
+## Marksman 9.3e-09  7.5e-08 0.67559 -        -      
+## Support  4.4e-05  0.00113 0.27196 0.16816  -      
+## Tank     0.41713  0.39759 1.8e-07 1.6e-07  0.00046
+## 
+## P value adjustment method: none</code></pre>
+<pre class="r"><code>pairwise.t.test(LoL_Champions$Range, LoL_Champions$Class, p.adj=&quot;none&quot;)</code></pre>
+<pre><code>## 
+##  Pairwise comparisons using t tests with pooled SD 
+## 
+## data:  LoL_Champions$Range and LoL_Champions$Class 
+## 
+##          Assassin Fighter Mage    Marksman Support
+## Fighter  0.23     -       -       -        -      
+## Mage     &lt; 2e-16  &lt; 2e-16 -       -        -      
+## Marksman &lt; 2e-16  &lt; 2e-16 0.54    -        -      
+## Support  3.9e-12  &lt; 2e-16 1.7e-05 5.7e-06  -      
+## Tank     0.15     0.63    &lt; 2e-16 &lt; 2e-16  2.3e-16
+## 
+## P value adjustment method: none</code></pre>
+<pre class="r"><code>pairwise.t.test(LoL_Champions$Damage, LoL_Champions$Class, p.adj=&quot;none&quot;)</code></pre>
+<pre><code>## 
+##  Pairwise comparisons using t tests with pooled SD 
+## 
+## data:  LoL_Champions$Damage and LoL_Champions$Class 
+## 
+##          Assassin Fighter Mage    Marksman Support
+## Fighter  0.063    -       -       -        -      
+## Mage     5.2e-10  &lt; 2e-16 -       -        -      
+## Marksman 0.130    8.1e-05 5.3e-08 -        -      
+## Support  7.5e-08  1.4e-14 0.984   6.0e-06  -      
+## Tank     0.777    0.103   1.1e-11 0.058    6.3e-09
+## 
+## P value adjustment method: none</code></pre>
+<pre class="r"><code>pairwise.t.test(LoL_Champions$AttackSpeed, LoL_Champions$Class, p.adj=&quot;none&quot;)</code></pre>
+<pre><code>## 
+##  Pairwise comparisons using t tests with pooled SD 
+## 
+## data:  LoL_Champions$AttackSpeed and LoL_Champions$Class 
+## 
+##          Assassin Fighter Mage    Marksman Support
+## Fighter  0.4156   -       -       -        -      
+## Mage     0.0151   0.0312  -       -        -      
+## Marksman 0.1863   0.4658  0.2337  -        -      
+## Support  0.0633   0.1545  0.8054  0.4597   -      
+## Tank     0.2340   0.0213  9.7e-05 0.0074   0.0022 
+## 
+## P value adjustment method: none</code></pre>
+</div>
+<div id="errors" class="section level2">
+<h2>Errors</h2>
+<p>Before we can discuss significant differences across Class, we need to see the probability of a Type I error and if we need to use Bonferroni correction.</p>
+<pre class="r"><code>1-.95^113</code></pre>
+<pre><code>## [1] 0.9969607</code></pre>
+<p>The probability of a Type I error was about 99%. This means we should use the Bonferroni correction in order to make accurate conclusions about the data.</p>
+</div>
+<div id="interpreting-after-corrections" class="section level2">
+<h2>Interpreting after Corrections</h2>
+<p>For many of the test there were a quite a lot that were significant. Therefore, only the most interesting and/ or the tests with the smallest p-Value were discussed.</p>
+<div id="hp" class="section level3">
+<h3>Hp</h3>
+<pre class="r"><code>0.05/113</code></pre>
+<pre><code>## [1] 0.0004424779</code></pre>
+<pre class="r"><code>pairwise.t.test(LoL_Champions$Hp, LoL_Champions$Class, p.adj=&quot;bonferroni&quot;)</code></pre>
+<pre><code>## 
+##  Pairwise comparisons using t tests with pooled SD 
+## 
+## data:  LoL_Champions$Hp and LoL_Champions$Class 
+## 
+##          Assassin Fighter Mage   Marksman Support
+## Fighter  1.0000   -       -      -        -      
+## Mage     0.0001   3.2e-06 -      -        -      
+## Marksman 0.0041   0.0010  1.0000 -        -      
+## Support  0.0198   0.0127  1.0000 1.0000   -      
+## Tank     1.0000   1.0000  0.0002 0.0090   0.0418 
+## 
+## P value adjustment method: bonferroni</code></pre>
+<p>For Hp, Fighter and Mages seemed to have the most significant difference in Hp. Made sense as Mages typically only fight ranged and Fighers only fight up close. It was intersting to see how those with a p-value of 1 (no significant difference) paired up. As it goes it appears that Fighters, Assassins, and Tanks are in one group and Mage, Marksman, and Support are in another. This matches up with which classes are frontline and which are backline.</p>
+</div>
+<div id="movementspeed" class="section level3">
+<h3>MovementSpeed</h3>
+<pre class="r"><code>pairwise.t.test(LoL_Champions$MovementSpeed, LoL_Champions$Class, p.adj=&quot;bonferroni&quot;)</code></pre>
+<pre><code>##
+## Pairwise comparisons using t tests with pooled SD
+##
+## data: LoL_Champions$MovementSpeed and
+LoL_Champions$Class
+##
+## Assassin Fighter Mage Marksman Support
+## Fighter 1.00000 - - - -
+## Mage 0.00036 1.6e-07 - - -
+## Marksman 2.4e-09 1.9e-14 0.01616 - -
+## Support 1.1e-05 2.1e-08 1.00000 1.00000 -
+## Tank 0.46085 0.04887 0.63815 5.1e-05 0.02123
+##
+## P value adjustment method: bonferroni</code></pre>
+<p>The pair with the smallest p-value was Fighters and Marksmans. Considering that Fighters usually solo lane and need the speed to get back to their position from base while Marksmans usually have their Support to cover their lane if they go to base, this significant difference is not surprising.</p>
+</div>
+<div id="armor" class="section level3">
+<h3>Armor</h3>
+<pre class="r"><code>pairwise.t.test(LoL_Champions$Armor, LoL_Champions$Class, p.adj=&quot;bonferroni&quot;)</code></pre>
+<pre><code>## 
+##  Pairwise comparisons using t tests with pooled SD 
+## 
+## data:  LoL_Champions$Armor and LoL_Champions$Class 
+## 
+##          Assassin Fighter Mage    Marksman Support
+## Fighter  0.00154  -       -       -        -      
+## Mage     2.5e-06  &lt; 2e-16 -       -        -      
+## Marksman 0.65215  6.5e-10 0.00321 -        -      
+## Support  0.38544  1.00000 6.4e-12 0.00025  -      
+## Tank     0.00041  1.00000 &lt; 2e-16 2.0e-09  0.87069
+## 
+## P value adjustment method: bonferroni</code></pre>
+<p>The most significant differences apear to be Fighter and Mages and Tanks and Mages. This is unsurprising as Fighters and Tanks are frontliners and most likely have similar Armor stats and Mages are backliners and have no need for Armor.</p>
+</div>
+<div id="spellblock" class="section level3">
+<h3>SpellBlock</h3>
+<pre class="r"><code>pairwise.t.test(LoL_Champions$SpellBlock, LoL_Champions$Class, p.adj=&quot;bonferroni&quot;)</code></pre>
+<pre><code>## 
+##  Pairwise comparisons using t tests with pooled SD 
+## 
+## data:  LoL_Champions$SpellBlock and LoL_Champions$Class 
+## 
+##          Assassin Fighter Mage    Marksman Support
+## Fighter  1.00000  -       -       -        -      
+## Mage     1.4e-07  7.7e-07 -       -        -      
+## Marksman 1.4e-07  1.1e-06 1.00000 -        -      
+## Support  0.00067  0.01700 1.00000 1.00000  -      
+## Tank     1.00000  1.00000 2.7e-06 2.4e-06  0.00694
+## 
+## P value adjustment method: bonferroni</code></pre>
+<p>The smallest p-value here is Mage and Fighters which follows the logic of frontline versus backline.</p>
+</div>
+<div id="range" class="section level3">
+<h3>Range</h3>
+<pre class="r"><code>pairwise.t.test(LoL_Champions$Range, LoL_Champions$Class, p.adj=&quot;bonferroni&quot;)</code></pre>
+<pre><code>## 
+##  Pairwise comparisons using t tests with pooled SD 
+## 
+## data:  LoL_Champions$Range and LoL_Champions$Class 
+## 
+##          Assassin Fighter Mage    Marksman Support
+## Fighter  1.00000  -       -       -        -      
+## Mage     &lt; 2e-16  &lt; 2e-16 -       -        -      
+## Marksman &lt; 2e-16  &lt; 2e-16 1.00000 -        -      
+## Support  5.8e-11  &lt; 2e-16 0.00026 8.6e-05  -      
+## Tank     1.00000  1.00000 &lt; 2e-16 &lt; 2e-16  3.4e-15
+## 
+## P value adjustment method: bonferroni</code></pre>
+<p>Range’s results is unsurprising as it depends on whether or not the Champion is frontline and backline. Once again we see it split Mage, Marksman, and Support versus Fighter, Assassin, and Tank.</p>
+</div>
+<div id="damage" class="section level3">
+<h3>Damage</h3>
+<pre class="r"><code>pairwise.t.test(LoL_Champions$Damage, LoL_Champions$Class, p.adj=&quot;bonferroni&quot;)</code></pre>
+<pre><code>## 
+##  Pairwise comparisons using t tests with pooled SD 
+## 
+## data:  LoL_Champions$Damage and LoL_Champions$Class 
+## 
+##          Assassin Fighter Mage    Marksman Support
+## Fighter  0.9463   -       -       -        -      
+## Mage     7.8e-09  &lt; 2e-16 -       -        -      
+## Marksman 1.0000   0.0012  8.0e-07 -        -      
+## Support  1.1e-06  2.1e-13 1.0000  9.0e-05  -      
+## Tank     1.0000   1.0000  1.7e-10 0.8672   9.5e-08
+## 
+## P value adjustment method: bonferroni</code></pre>
+<p>Following along with the previous tests, it is quite apparent that Mages and Fighters most represent backline and frontline respectively. This is seen as how in almost each stat that depends on whether or not they are a frontline damage taker or a backline damage dealer, these two classes had the most significant difference.</p>
+</div>
+<div id="attack-speed" class="section level3">
+<h3>Attack Speed</h3>
+<pre class="r"><code>pairwise.t.test(LoL_Champions$AttackSpeed, LoL_Champions$Class, p.adj=&quot;bonferroni&quot;)</code></pre>
+<pre><code>## 
+##  Pairwise comparisons using t tests with pooled SD 
+## 
+## data:  LoL_Champions$AttackSpeed and LoL_Champions$Class 
+## 
+##          Assassin Fighter Mage   Marksman Support
+## Fighter  1.0000   -       -      -        -      
+## Mage     0.2263   0.4685  -      -        -      
+## Marksman 1.0000   1.0000  1.0000 -        -      
+## Support  0.9499   1.0000  1.0000 1.0000   -      
+## Tank     1.0000   0.3194  0.0015 0.1113   0.0327 
+## 
+## P value adjustment method: bonferroni</code></pre>
+<p>There were only two significant differences for AttackSpeed: Mage and Tank; Support and Tank. Based on my knowledge of the game, I do not know why that is. This was quite interesting as I thought that at least Marksman would show a difference. However, I do realize that throught the game, players often buy items to boost their champions abilities and MovementSpeed is one the first stats that items are dedicated toward.</p>
+</div>
+</div>
+<div id="assumptions" class="section level2">
+<h2>Assumptions</h2>
+<p>There are many MANOVA assumptions and they are quite difficult to meet. Some that this data did not meet was homogeneity of within group covariance matrices as not all of the Dependent Variables had the same variance. Another is multicollinearity, I believe that quite a few of the DVs, were correlated. Some of the assumptions this data met was linear relationships, multivariate normality and linear relationships.</p>
+</div>
+</div>
+<div id="randomization-test-mean-difference" class="section level1">
+<h1>Randomization Test (Mean Difference)</h1>
+<p>During the t-test analysis, I thought it was interesting that there was a significant difference of the MovementSpeed of Tank and Support, I wanted to investigate it a little further using a randomization test for mean difference. I wanted to see how great of a difference is the MovementSpeed between these two Classes. The null hypothesis is that the mean MovementSpeed of both Tanks and Support is the same. The alternative is that the mean MovementSpeed is not the same for the two. In other words, there is a significant difference.</p>
+<pre class="r"><code>data&lt;- LoL_Champions %&gt;% filter(Class == &quot;Tank&quot; | Class == &quot;Support&quot;)
+
+rand_dist &lt;- vector()
+for (i in 1:5000) {
+    new &lt;- data.frame(MovementSpeed= sample(data$MovementSpeed), 
+        Class = data$Class)
+    rand_dist[i] &lt;- mean(new[new$Class == &quot;Tank&quot;, ]$MovementSpeed) - 
+        mean(new[new$Class == &quot;Support&quot;, ]$MovementSpeed)
+}
+
+data %&gt;% group_by(Class) %&gt;%summarise(means = mean(MovementSpeed)) %&gt;% summarise(mean_diff = diff(means))</code></pre>
+<pre><code>## # A tibble: 1 x 1
+##   mean_diff
+##       &lt;dbl&gt;
+## 1      6.37</code></pre>
+<pre class="r"><code>mean(rand_dist &gt; 6.368421 | rand_dist &lt; -6.368421)</code></pre>
+<pre><code>## [1] 0.0074</code></pre>
+<p>Looking at the actual mean difference of MovementSpeed between Tanks and Support, it is a big enough number that I would assume it is significant. This was supported by the randomizaiton test as the resulting p-value was less than 0.05.</p>
+<pre class="r"><code>hist(rand_dist,main=&quot;&quot;,ylab=&quot;&quot;); abline(v = c(-6.368421, 6.368421),col=&quot;red&quot;)</code></pre>
+<p><img src="../../project/project2_files/figure-html/unnamed-chunk-16-1.png" width="768" style="display: block; margin: auto;" /></p>
+<p>Looking at the distribution of the sampling against the actual mean difference test statistic, we see that almost all the saplings fall within the two extremes of the mean difference. This goes to show that the mean differnce is significant as even with random testing the pattern still shows.</p>
+</div>
+<div id="linear-regression" class="section level1">
+<h1>Linear Regression</h1>
+<p>In the previous project as well as during the ANOVA and pairwise t-tests in this project, it is apparent that Range and Class are associated with one another. Given the knowedge that backline Champions usually have smaller Armor than front line, I wanted to do a linear Regression Model to see how the interaction of Range and Class relates to Armor.</p>
+<div id="interpreting-the-coefficients" class="section level3">
+<h3>Interpreting the Coefficients</h3>
+<pre class="r"><code>LoL_Champions2 &lt;- LoL_Champions
+LoL_Champions2$Range_c&lt;-LoL_Champions2$Range - mean(LoL_Champions2$Range, 
+    na.rm = T)
+fit &lt;- lm(Armor~Range_c *Class, data = LoL_Champions2)
+summary(fit)</code></pre>
+<pre><code>##
+## Call:
+## lm(formula = Armor ~ Range_c * Class, data =
+LoL_Champions2)
+##
+## Residuals:
+## Min 1Q Median 3Q Max
+## -11.2263 -2.0540 0.1022 1.7862 10.1022
+##
+## Coefficients:
+## Estimate Std. Error t value Pr(&gt;|t|)
+## (Intercept) 27.240703 1.342338 20.293 &lt; 2e-16 ***
+## Range_c -0.015788 0.006909 -2.285 0.023860 *
+## ClassFighter 10.005626 2.844805 3.517 0.000593 ***
+## ClassMage -2.377387 2.287309 -1.039 0.300472
+## ClassMarksman 1.678464 3.974762 0.422 0.673487
+## ClassSupport 9.153589 1.698481 5.389 3.03e-07 ***
+## ClassTank -3.717415 7.183006 -0.518 0.605628
+## Range_c:ClassFighter 0.031151 0.015711 1.983 0.049412 *
+## Range_c:ClassMage 0.002828 0.011166 0.253 0.800461
+## Range_c:ClassMarksman 0.005245 0.018595 0.282 0.778318
+## Range_c:ClassSupport -0.024960 0.008862 -2.816 0.005579
+**
+## Range_c:ClassTank -0.051073 0.038657 -1.321 0.188657
+## ---
+## Signif. codes: 0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1
+&#39; &#39; 1
+##
+## Residual standard error: 3.611 on 136 degrees of freedom
+## Multiple R-squared: 0.7276, Adjusted R-squared: 0.7055
+## F-statistic: 33.02 on 11 and 136 DF, p-value: &lt; 2.2e-16</code></pre>
+<p>In the results above, we can determine a lot about how interaction between Class and Range can predict Armor. Controlling for Class, those with the mean Range, has a Armor stat of 27.240703. Still controlling for Range, every 1 unit increase from the mean Range, the Champion is expected to have their Armor decrease by -0.015788. For the Class[ClassName] coefficients, the Armor stat for that Class at the mean Range is expected to be higher(if positive) or lower (if negative) by that much in comparison to the other Classes. For example, looking at ClassFighter, Fighter Class Champions with the average Range are expected to have Armor that is 10.005626 higher than the Armor of other Champions. For the coefficients Range_c:Class[ClassName], this numvber represents the effect of Range on Armor for those Classes. For example, Range_c:ClassTank shows that the effect of Range on Armor is 0.051073 lower(due to it being negative it would be higher if the number was positive) for Tanks than other Champions. Also the R-squared value shows that about 72.76% of variation in Armor is explained by this model (interaction between Range and Class).</p>
+</div>
+<div id="plotting" class="section level3">
+<h3>Plotting</h3>
+<pre class="r"><code>LoL_Champions2 %&gt;% select(Armor, Range_c, Class) %&gt;% na.omit %&gt;% 
+  ggplot(aes(Range_c, Armor, color = Class)) +geom_point() + geom_smooth(method = &quot;lm&quot;) +
+  geom_vline(xintercept = mean(LoL_Champions2$Range_c, na.rm = T), lty=2)</code></pre>
+<p><img src="../../project/project2_files/figure-html/unnamed-chunk-18-1.png" width="768" style="display: block; margin: auto;" /></p>
+</div>
+<div id="assumptions-1" class="section level3">
+<h3>Assumptions</h3>
+<p>This model passes the linearity and homoskedacity assumptions as it does not appear to fan out or curve. Then, by looking at the ks.test results, we see that we do not reject the null hypothesis of normality. In other words, this model follows normality.</p>
+<pre class="r"><code>resids&lt;-fit$residuals
+fitvals&lt;- fit$fitted.values
+ggplot() +geom_point(aes(fitvals, resids)) + geom_hline(yintercept=0, color =&quot;red&quot;)</code></pre>
+<p><img src="../../project/project2_files/figure-html/unnamed-chunk-19-1.png" width="768" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>ks.test(resids, &quot;pnorm&quot;, mean=0, sd(resids))</code></pre>
+<pre><code>## 
+##  One-sample Kolmogorov-Smirnov test
+## 
+## data:  resids
+## D = 0.0698, p-value = 0.4666
+## alternative hypothesis: two-sided</code></pre>
+</div>
+<div id="robust-standard-errors" class="section level3">
+<h3>Robust Standard Errors</h3>
+<p>Looking at the model now with robust standard error, we can see which relationships/effects/interactions are significant(most likely not due to chance) as well as compare it to our previous results. Controlling for Class, the effect of Range on Armor remains significant with and without standard error. Classes Fighter and Support at the mean Range effect on Armor also remains significant. The effect of Range on Fighter Class Champions’ Armor, however, was significant before but is no longer significant. The same goes for the effect of Range on Support Champions.</p>
+<pre class="r"><code>coeftest(fit, vcov = vcovHC(fit))</code></pre>
+<pre><code>##
+## t test of coefficients:
+##
+## Estimate Std. Error t value Pr(&gt;|t|)
+## (Intercept) 27.2407035 2.3416389 11.6332 &lt; 2.2e-16 ***
+## Range_c -0.0157879 0.0117576 -1.3428 0.1815781
+## ClassFighter 10.0056256 3.6118645 2.7702 0.0063857 **
+## ClassMage -2.3773866 2.5121112 -0.9464 0.3456383
+## ClassMarksman 1.6784642 5.6043837 0.2995 0.7650224
+## ClassSupport 9.1535892 2.6317104 3.4782 0.0006784 ***
+## ClassTank -3.7174148 8.0722145 -0.4605 0.6458787
+## Range_c:ClassFighter 0.0311510 0.0189942 1.6400
+0.1033098
+## Range_c:ClassMage 0.0028277 0.0125146 0.2260 0.8215748
+## Range_c:ClassMarksman 0.0052451 0.0256492 0.2045
+0.8382746
+## Range_c:ClassSupport -0.0249601 0.0131336 -1.9005
+0.0594863 .
+## Range_c:ClassTank -0.0510734 0.0436450 -1.1702 0.2439673
+## ---
+## Signif. codes: 0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1
+&#39; &#39; 1</code></pre>
+</div>
+<div id="bootstrapping-the-previous-model" class="section level2">
+<h2>Bootstrapping the Previous Model</h2>
+<p>When bootsrapping the previous model, the SE values increased in comparison to the original linear regression model and the robust SE linear regression model, some more than others. From this information, we can assume the the p-values increased as well.</p>
+<pre class="r"><code>samp_distn&lt;-replicate(5000, {
+  boot_dat &lt;- sample_frac(LoL_Champions2, replace=T)
+  fit2 &lt;- lm(Armor~Range_c *Class, data=boot_dat) 
+  coef(fit2)
+}) 
+samp_distn %&gt;% t %&gt;% as.data.frame %&gt;% summarize_all(sd) </code></pre>
+<pre><code>## (Intercept) Range_c ClassFighter ClassMage ClassMarksman
+ClassSupport ClassTank
+## 1 17.70199 0.09101393 17.92514 17.90779 18.12875 17.7661
+19.89666
+## Range_c:ClassFighter Range_c:ClassMage
+Range_c:ClassMarksman Range_c:ClassSupport
+## 1 0.09229316 0.09151897 0.09259732 NA
+## Range_c:ClassTank
+## 1 NA</code></pre>
+</div>
+</div>
+<div id="logistic-regression-with-binary-response-prediction" class="section level1">
+<h1>Logistic Regression with Binary Response Prediction</h1>
+<p>Considering the association of Damage and Range with backline versus frontline, I wanted to see if we could predict the odds of the Champion being a Mage(the main representative of backline) by using Damage and Range.</p>
+<pre class="r"><code>LoL_Champions3&lt;- LoL_Champions %&gt;% mutate(y = ifelse(Class == &quot;Mage&quot;, 1, 0))
+LoL_Champions4&lt;- LoL_Champions3 %&gt;% select(y, Damage, Range)
+fit3&lt;-glm(y~Damage + Range, data = LoL_Champions4, family = binomial(link =&quot;logit&quot;))
+exp(coef(fit3))</code></pre>
+<pre><code>## (Intercept)      Damage       Range 
+## 345.6191611   0.8355089   1.0073193</code></pre>
+<p>Looking at the coefficients of this model, controlling for Range every one unit increase in Damage, the odds of the Champion being a Mage multiplies by 0.8355089. When controlling for Damage, the odds of the Champion being a Mage multiplies by 1.0073193.</p>
+<div id="confusion-matrix" class="section level2">
+<h2>Confusion Matrix</h2>
+<pre class="r"><code>probs&lt;- predict(fit3, type=&quot;response&quot;)
+class_diag(probs, LoL_Champions4$y)</code></pre>
+<pre><code>##         acc      sens      spec       ppv       auc
+## 1 0.8378378 0.5757576 0.9130435 0.6551724 0.8998682</code></pre>
+<pre class="r"><code>table(predict=as.numeric(probs&gt;.5), LoL_Champions4$y) %&gt;% addmargins</code></pre>
+<pre><code>##        
+## predict   0   1 Sum
+##     0   105  14 119
+##     1    10  19  29
+##     Sum 115  33 148</code></pre>
+<p>Using the confusion matrix of predictions versus true outcome we can calculate the accuracy, sensitivity, specificity, and precision of this model. For this model the proportion of correctly classified cases is about 83.8%. The sensitivity, the proportion of non-Mages correctly classified, is about 57.6%. The specificity, the proportion of Mages correctly classified is about 91.3%. The precision is the proportion of those classified as non-Mage that actually were non-Mage and in this model it was about 65.5%. The AUC was a around 0.9. This shows that the probability that a random Champion that is a Mage has a higher predicted probability that a random Champion is not a Mage. This means that this is a great model to predict Mages.</p>
+</div>
+<div id="density-plot" class="section level2">
+<h2>Density Plot</h2>
+<pre class="r"><code>LoL_Champions4$logit&lt;-predict(fit3,type=&quot;link&quot;)
+LoL_Champions4&lt;-LoL_Champions4 %&gt;% mutate(Class=ifelse(y==1,&quot;Mage&quot;,&quot;non-Mage&quot;))
+LoL_Champions4 %&gt;% mutate(Class=as.factor(Class)) %&gt;% ggplot() + geom_density(aes(logit, color = Class, fill=Class), alpha=.3) + theme(legend.position=c(.85,.85))+xlab(&quot;logit (log-odds)&quot;)+geom_vline(xintercept=0) +geom_rug(aes(logit,color=Class))</code></pre>
+<p><img src="../../project/project2_files/figure-html/unnamed-chunk-24-1.png" width="768" style="display: block; margin: auto;" /></p>
+</div>
+<div id="roc" class="section level2">
+<h2>ROC</h2>
+<p>A ROC curve lets us visualize the tradeoff between sensitivity and specificity by graphing true positives against false positives. Then using the graph, you can calculate the AUC. The AUC from the ROC plot was slightly lower than the one calculated before. However, it is still a good model as the AUC is 0.8.</p>
+<pre class="r"><code>ROCplot &lt;- ggplot(LoL_Champions4) + geom_roc(aes(d = y, 
+    m = Damage + Range), n.cuts = 0)
+ROCplot</code></pre>
+<p><img src="../../project/project2_files/figure-html/unnamed-chunk-25-1.png" width="768" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>calc_auc(ROCplot)</code></pre>
+<pre><code>##   PANEL group       AUC
+## 1     1    -1 0.8355731</code></pre>
+</div>
+</div>
+<div id="logistic-regression-predicting-from-the-rest-of-the-variables" class="section level1">
+<h1>Logistic Regression Predicting From The Rest of The Variables</h1>
+<p>Now, I looked at the rest of the variables to see how they would be used to predict if the Champion is a Mage or not.</p>
+<pre class="r"><code>LoL_Champions5&lt;- LoL_Champions3 %&gt;% select(y, Hp, MovementSpeed, Armor, SpellBlock, AttackSpeed, ResourceType, ResourcePool)
+fit4&lt;-glm(y~ Hp + MovementSpeed + Armor + SpellBlock + AttackSpeed + ResourcePool, data = LoL_Champions5, family = binomial(link =&quot;logit&quot;))
+probs2&lt;- predict(fit4, type=&quot;response&quot;)
+class_diag(probs2, LoL_Champions5$y)</code></pre>
+<pre><code>##         acc      sens      spec       ppv       auc
+## 1 0.9054054 0.7575758 0.9478261 0.8064516 0.9552042</code></pre>
+<p>For this model, the proportion of correctly classified cases is about 90.5%. The sensitivity, the proportion of non-Mages correctly classified, is about 75.7%. The specificity, the proportion of Mages correctly classified is about 94.7%. The precision is the proportion of those classified as non-Mage that actually were non-Mage and in this model it was about 80.6%. The AUC was a around 0.9. This shows that the probability that a random Champion that is a Mage has a higher predicted probability that a random Champion is not a Mage. This means that this is a great model to predict Mages.</p>
+<div id="fold-cv" class="section level2">
+<h2>10-fold CV</h2>
+<pre class="r"><code>set.seed(1234)
+k=10
+part6&lt;-LoL_Champions5[sample(nrow(LoL_Champions5)),]
+folds&lt;-cut(seq(1:nrow(LoL_Champions5)),breaks=k,labels=F) 
+diags&lt;-NULL
+for(i in 1:k){
+  train&lt;-part6[folds!=i,]
+  test&lt;-part6[folds==i,]
+  truth&lt;-test$y
+  fit5&lt;-glm(y~Hp + MovementSpeed + Armor + SpellBlock + AttackSpeed + ResourcePool, data = train, family=binomial(link = &quot;logit&quot;))
+  probs3&lt;-predict(fit5,newdata = test,type=&quot;response&quot;)
+  diags&lt;-rbind(diags,class_diag(probs3,truth))
+}
+summarize_all(diags,mean)</code></pre>
+<pre><code>##         acc      sens      spec       ppv      auc
+## 1 0.8785714 0.6733333 0.9315385 0.7880952 0.943453</code></pre>
+<p>After the 10-fold CV, the proportion of correctly classified cases is lower than before now at 87.8%. The sensitivity, dropped to 67.3%. The specificity, dropped to about 93.1%. The precision decreased to about 78.8%. The AUC was a around 0.9 meaning that this is still a good model to predict Mages.</p>
+</div>
+<div id="lasso" class="section level2">
+<h2>LASSO</h2>
+<p>After running LASSO on my data, the only variable retained was Armor and ResourcePool.</p>
+<pre class="r"><code>y&lt;-as.matrix(LoL_Champions5$y)
+x&lt;-model.matrix(y~.,data=LoL_Champions5)[,-1]
+cv&lt;-cv.glmnet(x,y,family=&quot;binomial&quot;)
+lasso&lt;-glmnet(x,y,family=&quot;binomial&quot;,lambda=cv$lambda.1se)
+coef(lasso)</code></pre>
+<pre><code>## 19 x 1 sparse Matrix of class &quot;dgCMatrix&quot;
+##                                     s0
+## (Intercept)               3.8108718330
+## Hp                        .           
+## MovementSpeed             .           
+## Armor                    -0.1881744468
+## SpellBlock                .           
+## AttackSpeed               .           
+## ResourceTypeCourage       .           
+## ResourceTypeCrimson Rush  .           
+## ResourceTypeEnergy        .           
+## ResourceTypeFerocity      .           
+## ResourceTypeFlow          .           
+## ResourceTypeFury          .           
+## ResourceTypeGrit          .           
+## ResourceTypeHeat          .           
+## ResourceTypeMana          .           
+## ResourceTypeNone          .           
+## ResourceTypeRage          .           
+## ResourceTypeShield        .           
+## ResourcePool              0.0006210667</code></pre>
+<div id="cross-validating-lasso" class="section level3">
+<h3>Cross Validating LASSO</h3>
+<pre class="r"><code>LoL_Champions6&lt;-LoL_Champions5 %&gt;% select(y, Armor, ResourcePool)
+set.seed(1234)
+k=10
+part6.2&lt;-LoL_Champions6[sample(nrow(LoL_Champions6)),]
+folds&lt;-cut(seq(1:nrow(LoL_Champions6)),breaks=k,labels=F) 
+diags&lt;-NULL
+for(i in 1:k){
+  train2&lt;-part6.2[folds!=i,]
+  test2&lt;-part6.2[folds==i,]
+  truth2&lt;-test$y
+  fit6&lt;-glm(y~ Armor + ResourcePool, data = train, family=binomial(link = &quot;logit&quot;))
+  probs4&lt;-predict(fit5,newdata = test,type=&quot;response&quot;)
+  diags2&lt;-rbind(diags,class_diag(probs3,truth))
+}
+summarize_all(diags2,mean)</code></pre>
+<pre><code>##         acc sens      spec ppv       auc
+## 1 0.8666667    1 0.8461538 0.5 0.9230769</code></pre>
+<p>After LASSO, the 10-fold CV accuracy is lower than before now at 86.6%. The sensitivity is now 1. The specificity, dropped to about 84.6%. The precision decreased to about 50%. The AUC was a around 0.9 meaning that this is still a good model to predict Mages.</p>
+</div>
+</div>
+</div>
+
+            
+        <hr>         <div class="related-posts">
+                <h5>Related Posts</h5>
+                
+              </div> 
+            </div>
+          </div>
+
+   <hr>  <div class="disqus">
+  <div id="disqus_thread"></div>
+  <script type="text/javascript">
+
+    (function() {
+      
+      
+      if (window.location.hostname == "localhost")
+        return;
+
+      var disqus_shortname = '';
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+  </script>
+  <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+  <a href="http://disqus.com/" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div> 
+        </div>
+      </div>
+    </div>
+
+    
+    <footer>
+  <div id="footer">
+    <div class="container">
+      <p class="text-muted">&copy; All rights reserved. Powered by <a href="https://gohugo.io/">Hugo</a> and
+      <a href="http://www.github.com/nurlansu/hugo-sustain/">sustain</a> with ♥</p>
+    </div>
+  </div>
+</footer>
+<div class="footer"></div>
+
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+<script src="../../js/docs.min.js"></script>
+<script src="../../js/main.js"></script>
+
+<script src="../../js/ie10-viewport-bug-workaround.js"></script>
+
+
+    
+  </body>
+</html>

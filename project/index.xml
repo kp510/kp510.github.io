@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Projects on Kim Phan</title>
+    <link>/project/</link>
+    <description>Recent content in Projects on Kim Phan</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-US</language><atom:link href="/project/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Project 2: Modeling, Testing, and Predicting</title>
+      <link>/project/project2/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>/project/project2/</guid>
+      <description>Introduction: Welcome Back to Summoner’s Rift! For review, League of Legends(LoL) is a team based multiplayer online battle arena game where two teams of 5 battle to see who destroys the base first. There are 5 positions corresponding to the 3 map lanes: Top, Mid, Bot(Support and Attack Damage Carry or ADC), and Jungle(they roam). Often the characters(Champions) have specific classes that are associated with the position they are suited for.</description>
+    </item>
+    
+    <item>
+      <title>Project1: Exploratory Data Analysis</title>
+      <link>/project/project1/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>/project/project1/</guid>
+      <description>0. Introduction: Welcome to Summoner’s Rift! One of my favorite games is League of Legends(LoL). LoL is a team based multiplayer online battle arena game where two teams of 5 battle to see who destroys the base first. There are 5 positions corresponding to the 3 map lanes: Top, Mid, Bot(Support and Attack Damage Carry or ADC), and Jungle(they roam). LoL’s company, Riot, also has many other games that share the same universe.</description>
+    </item>
+    
+  </channel>
+</rss>

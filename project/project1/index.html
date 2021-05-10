@@ -1,0 +1,2038 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="author" content="Kim Phan" />
+    
+    <link rel="shortcut icon" type="image/x-icon" href="../../img/favicon.ico">
+    <title>Project1: Exploratory Data Analysis</title>
+    <meta name="generator" content="Hugo 0.83.1" />
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="../../css/main.css" />
+    <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" />
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:200,400,200bold,400old" />
+    
+    <!--[if lt IE 9]>
+			<script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+			<script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+		<![endif]-->
+
+    
+  </head>
+
+  <body>
+    <div id="wrap">
+      
+      <nav class="navbar navbar-default">
+  <div class="container">
+    <div class="navbar-header">
+      <a class="navbar-brand" href="../../"><i class="fa fa-home"></i></a>
+      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <div class="navbar-collapse collapse" id="navbar">
+      <ul class="nav navbar-nav navbar-right">
+      
+        
+        <li><a href="../../post/">BLOG</a></li>
+        
+        <li><a href="../../projects/">PROJECTS</a></li>
+        
+        <li><a href="../../resume/">RESUME</a></li>
+        
+      
+      </ul>
+    </div>
+  </div>
+</nav>
+
+      <div class="container">
+        <div class="blog-post">
+          <h3>
+            <strong><a href="../../project/project1/">Project1: Exploratory Data Analysis</a></strong>
+          </h3>
+        </div>
+ 
+<div class="blog-title">
+          <h4>
+         January 1, 0001 
+            &nbsp;&nbsp;
+            
+          </h4>
+        </div>
+
+        <div class="panel panel-default">
+          <div class="panel-body">
+            <div class="blogpost">
+              
+<script src="../../rmarkdown-libs/kePrint/kePrint.js"></script>
+<link href="../../rmarkdown-libs/lightable/lightable.css" rel="stylesheet" />
+
+
+<div id="introduction-welcome-to-summoners-rift" class="section level2">
+<h2>0. Introduction: Welcome to Summoner’s Rift!</h2>
+<p>One of my favorite games is League of Legends(LoL). LoL is a team based multiplayer online battle arena game where two teams of 5 battle to see who destroys the base first. There are 5 positions corresponding to the 3 map lanes: Top, Mid, Bot(Support and Attack Damage Carry or ADC), and Jungle(they roam). LoL’s company, Riot, also has many other games that share the same universe. One example is Team Fight Tactics(TFT) which has a different play style as it is a free-for-all turn-based strategy game where players compete by making teams composed of characters and seeing which player made the best team composition. Players earn points from wins and losses and use them to “buy” new characters for their team.</p>
+<p>Both games share the same universe and therefor the same characters or “champions”. Both datasets were found on kaggle. My first data set contains the base stats and info for the champions of the main game. There are about 148 observations and about 40 variables. The second data set has 52 observations and about 12 variables which include base stats and champion info. Naturally, though both share champions, due to the different nature of the games the stats and abilities of the champions may vary per game. I hope to see if the base stats and info from the original game may have influenced those in the spin-off game, TFT. For example, perhaps the champion in LoL with the highest base health points also has the highest in TFT. I also hope to see if stats within the game influence each other.</p>
+</div>
+<div id="tidying-choose-your-champions-getting-the-right-data" class="section level2">
+<h2>1. Tidying: Choose Your Champions, Getting the Right Data</h2>
+<div id="editing-and-removing-variables" class="section level3">
+<h3>Editing and Removing Variables:</h3>
+<p>Both datasets have quite a few variables so I removed and narrowed down the variables to the ones I found relevant to my project purpose. This was done by creating a new dataframe and selecting only variables that I needed.</p>
+<pre class="r"><code>library(tidyverse)
+library(dplyr)
+LoL_Champions_RawData &lt;- read.csv(&quot;LoL_Champions.csv&quot;)
+LoL_Champions &lt;- LoL_Champions_RawData %&gt;% select(id, title, 
+    tags, stats.hp, stats.armor, stats.spellblock, stats.attackrange, 
+    stats.attackdamage, stats.attackspeed)</code></pre>
+<pre class="r"><code>TFT_Champions_RawData &lt;- read.csv(&quot;TFT_Champions.csv&quot;)
+TFT_Champions &lt;- TFT_Champions_RawData %&gt;% select(name, health, 
+    defense, attack, attack_range, speed_of_attack, origin, class)</code></pre>
+<p>For the rest of the project, variables that are game specific (i.e base Hp) have the game abbreviation in the front(i.e LoL.Hp for LoL base health and TFT.Hp for TFT). Shared traits (i.e Champion name) remain as is.</p>
+<pre class="r"><code>LoL_Champions &lt;- LoL_Champions %&gt;% select(Champion = id, Title = title, 
+    LoL.Class = tags, LoL.Hp = stats.hp, LoL.Armor = stats.armor, 
+    LoL.MagicArmor = stats.spellblock, LoL.Range = stats.attackrange, 
+    LoL.Damage = stats.attackdamage, LoL.AttackSpeed = stats.attackspeed)</code></pre>
+<pre class="r"><code>TFT_Champions &lt;- TFT_Champions %&gt;% select(Champion = name, TFT.Hp = health, 
+    TFT.TotalArmor = defense, TFT.Damage = attack, TFT.Range = attack_range, 
+    TFT.AttackSpeed = speed_of_attack, TFT.Origin = origin, TFT.Class = class)</code></pre>
+<p><em>This was done using select() to create a new data frame with the selected variables being set to the new names</em></p>
+</div>
+<div id="seperating-classes" class="section level3">
+<h3>Seperating Classes:</h3>
+<p>In both datasets, the Class columns have cases where there are two Classes. Using tidyr functions, I tidied the datasets so that there was a new column titled second Class.</p>
+<pre class="r"><code>LoL_Champions &lt;- LoL_Champions %&gt;% separate(LoL.Class, c(&quot;LoL.Class1&quot;, 
+    &quot;LoL.Class2&quot;), &quot;,&quot;)</code></pre>
+<pre class="r"><code>TFT_Champions &lt;- TFT_Champions %&gt;% separate(TFT.Class, c(&quot;TFT.Class1&quot;, 
+    &quot;TFT.Class2&quot;), &quot;,&quot;)</code></pre>
+<p><em>In order to create a second column for the second class, I separated the class column at the comma using separate() and created a second one. I did this for both datasets.</em></p>
+</div>
+<div id="pivoting" class="section level3">
+<h3>Pivoting :</h3>
+<p>My data was already tidy for the purpose of my project. However, to practice pivoting I decided to look into two variables within the TFT dataset. In this case, I wanted to see the if, at a glance, there was any association between Hp and Origin. Origin’s purpose in TFT is that when you have more than one champion on your team from said Origin, those champions are given a buff. With that in mind, perhaps the Origin of each champ was determined using the base stats to make the buff more effective. At a glance, there does not appear to be any association between Hp and Origin. Perhaps, Origin is just that and is determined based on the lore/background of each champion. Or perhaps Origin may be based off of other stats.</p>
+<pre class="r"><code>TFT_Origin &lt;- TFT_Champions %&gt;% select(Champion, TFT.Origin, 
+    TFT.Hp)
+TFT_Origin &lt;- TFT_Origin %&gt;% pivot_wider(names_from = TFT.Origin, 
+    values_from = TFT.Hp)
+head(TFT_Origin)</code></pre>
+<pre><code>## # A tibble: 6 x 11
+##   Champion `Space Pirate` `Star Guardian` Celestial `Dark Star` `Mech-Pilot`
+##   &lt;fct&gt;             &lt;int&gt;           &lt;int&gt;     &lt;int&gt;       &lt;int&gt;        &lt;int&gt;
+## 1 Gangpla…           1000              NA        NA          NA           NA
+## 2 Graves              650              NA        NA          NA           NA
+## 3 Neeko                NA             800        NA          NA           NA
+## 4 Darius              750              NA        NA          NA           NA
+## 5 Rakan                NA              NA       600          NA           NA
+## 6 Lux                  NA              NA        NA         600           NA
+## # … with 5 more variables: Cybernetic &lt;int&gt;, Rebel &lt;int&gt;, Valkyrie &lt;int&gt;,
+## #   Void &lt;int&gt;, Chrono &lt;int&gt;</code></pre>
+<p><em>After selecting for the variables I want to look into, I pivoted the set wider with the names of each column being taken from the Origin column and the values under each being Hp. </em></p>
+<pre class="r"><code>TFT_Origin &lt;- TFT_Origin %&gt;% pivot_longer(2:11, names_to = &quot;TFT.Origin&quot;, 
+    values_to = &quot;TFT.Hp&quot;, values_drop_na = T)
+head(TFT_Origin)</code></pre>
+<pre><code>## # A tibble: 6 x 3
+##   Champion  TFT.Origin    TFT.Hp
+##   &lt;fct&gt;     &lt;chr&gt;          &lt;int&gt;
+## 1 Gangplank Space Pirate    1000
+## 2 Graves    Space Pirate     650
+## 3 Neeko     Star Guardian    800
+## 4 Darius    Space Pirate     750
+## 5 Rakan     Celestial        600
+## 6 Lux       Dark Star        600</code></pre>
+<p><em>With the dataset wide like this, there is many NA values due to each champion only having one Origin. So I pivoted the dataset longer in order to return it to its original state. Also, I used values_drop_na, so that the NA values would be dropped.</em></p>
+</div>
+</div>
+<div id="joiningmerging-lets-group-mid" class="section level2">
+<h2>2. Joining/Merging: Let’s Group Mid!</h2>
+<p>Now that each data set is edited and tidied to my liking, I joined them so that they were on one dataset. There should be 52 observations in the joined set, however, due to an error in the raw data set for LoL one of the observations was dropped. The joined dataset has 51 observations and 17 variables.</p>
+<pre class="r"><code>Joined_Champions &lt;- inner_join(LoL_Champions, TFT_Champions, 
+    by = &quot;Champion&quot;)</code></pre>
+<p><em>I joined the data using inner_join() as in my joined dataset, I wanted only the champions’ data that appear in both games. TFT is a smaller game so by joining the two I also made the joined set a smaller dataset with less observations, making it easier to work with. </em></p>
+</div>
+<div id="wrangling-check-my-stats" class="section level2">
+<h2>3. Wrangling: Check my Stats!</h2>
+<div id="mutate-total-armor-and-dps" class="section level3">
+<h3>Mutate: Total Armor and DPS</h3>
+<p>In LoL, champions have two armor types, magic and regular. Instead of having two separate variables, I wanted just one column for Total Armor. Also, using the data for Attack Speed and Damage, I wanted to calculate the DPS or Damage Per Second each champion has.</p>
+<pre class="r"><code>Joined_Champions &lt;- Joined_Champions %&gt;% mutate(LoL.TotalArmor = LoL.Armor + 
+    LoL.MagicArmor)</code></pre>
+<pre class="r"><code>Joined_Champions &lt;- Joined_Champions %&gt;% mutate(LoL.DamagePerSec = LoL.Damage * 
+    LoL.AttackSpeed)
+Joined_Champions &lt;- Joined_Champions %&gt;% mutate(TFT.DamagePerSec = TFT.Damage * 
+    TFT.AttackSpeed)
+Joined_Champions &lt;- Joined_Champions %&gt;% select(Champion, Title, 
+    LoL.Class1, LoL.Class2, LoL.Hp, LoL.TotalArmor, LoL.Range, 
+    LoL.Damage, LoL.AttackSpeed, LoL.DamagePerSec, TFT.Origin, 
+    TFT.Class1, TFT.Class2, TFT.Hp, TFT.TotalArmor, TFT.Range, 
+    TFT.Damage, TFT.AttackSpeed, TFT.DamagePerSec)</code></pre>
+<p><em>In order to create these new columns. I used mutate() which took the values from preexisting columns and applied a function to them in order to create the new ones. For LoL.TotalArmor, the values of LoL.MagicArmor and LoL.Armor were added together. For the DamagePerSec for both LoL and TFT, the values in these columns were the products of Attack Speed and Damage. Finally, I used select() to edit the dataset to get rid of LoL.MagicArmor and LoL.Armor, which were no longer needed.</em></p>
+</div>
+<div id="summary-hp-and-totalarmor" class="section level3">
+<h3>Summary: Hp and TotalArmor</h3>
+<p>In LoL, the primary class of a champion is important when determining whether it suits the needs of the player. For a player who likes to be defensive and be a shield, high Hp and Total Armor is important. The champion with the highest Hp was Kayle, a fighter. The Champion with the lowest Hp was Caitlyn, a marksman. The highest Total Armor was Leona, a Tank. The lowest Total Armor was Lux, a mage.</p>
+<pre class="r"><code>library(kableExtra)
+Joined_Champions %&gt;% summarise(max(LoL.Hp), min(LoL.Hp), max(LoL.TotalArmor), 
+    min(LoL.TotalArmor))</code></pre>
+<pre><code>##   max(LoL.Hp) min(LoL.Hp) max(LoL.TotalArmor) min(LoL.TotalArmor)
+## 1         600         481                79.1               48.72</code></pre>
+<pre class="r"><code>Joined_Champions %&gt;% filter(LoL.Hp == max(LoL.Hp)) %&gt;% select(Champion)</code></pre>
+<pre><code>##   Champion
+## 1    Kayle</code></pre>
+<pre class="r"><code>Joined_Champions %&gt;% filter(LoL.Hp == min(LoL.Hp)) %&gt;% select(Champion)</code></pre>
+<pre><code>##   Champion
+## 1  Caitlyn</code></pre>
+<pre class="r"><code>Joined_Champions %&gt;% filter(LoL.TotalArmor == max(LoL.TotalArmor)) %&gt;% 
+    select(Champion)</code></pre>
+<pre><code>##   Champion
+## 1    Leona</code></pre>
+<pre class="r"><code>Joined_Champions %&gt;% filter(LoL.TotalArmor == min(LoL.TotalArmor)) %&gt;% 
+    select(Champion)</code></pre>
+<pre><code>##   Champion
+## 1      Lux</code></pre>
+<pre class="r"><code>Joined_Champions %&gt;% group_by(LoL.Class1) %&gt;% summarise(max.LoL.Hp = max(LoL.Hp)) %&gt;% 
+    arrange(desc(max.LoL.Hp)) %&gt;% kbl() %&gt;% kable_styling(bootstrap_options = &quot;striped&quot;, 
+    full_width = F, position = &quot;center&quot;)</code></pre>
+<table class="table table-striped" style="width: auto !important; margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:left;">
+LoL.Class1
+</th>
+<th style="text-align:right;">
+max.LoL.Hp
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+Fighter
+</td>
+<td style="text-align:right;">
+600.00
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Assassin
+</td>
+<td style="text-align:right;">
+598.56
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Tank
+</td>
+<td style="text-align:right;">
+582.60
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Marksman
+</td>
+<td style="text-align:right;">
+581.00
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Mage
+</td>
+<td style="text-align:right;">
+575.00
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Support
+</td>
+<td style="text-align:right;">
+560.52
+</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code>Joined_Champions %&gt;% group_by(LoL.Class1) %&gt;% summarize(min.LoL.Hp = min(LoL.Hp)) %&gt;% 
+    arrange(min.LoL.Hp) %&gt;% kbl() %&gt;% kable_styling(bootstrap_options = &quot;striped&quot;, 
+    full_width = F, position = &quot;center&quot;)</code></pre>
+<table class="table table-striped" style="width: auto !important; margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:left;">
+LoL.Class1
+</th>
+<th style="text-align:right;">
+min.LoL.Hp
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+Marksman
+</td>
+<td style="text-align:right;">
+481.00
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Support
+</td>
+<td style="text-align:right;">
+482.36
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Mage
+</td>
+<td style="text-align:right;">
+490.00
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Fighter
+</td>
+<td style="text-align:right;">
+523.00
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Tank
+</td>
+<td style="text-align:right;">
+540.00
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Assassin
+</td>
+<td style="text-align:right;">
+570.00
+</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code>Joined_Champions %&gt;% group_by(LoL.Class1) %&gt;% summarize(max.LoL.TotalArmor = max(LoL.TotalArmor)) %&gt;% 
+    arrange(max.LoL.TotalArmor) %&gt;% kbl() %&gt;% kable_styling(bootstrap_options = &quot;striped&quot;, 
+    full_width = F, position = &quot;center&quot;)</code></pre>
+<table class="table table-striped" style="width: auto !important; margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:left;">
+LoL.Class1
+</th>
+<th style="text-align:right;">
+max.LoL.TotalArmor
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+Mage
+</td>
+<td style="text-align:right;">
+56.0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Support
+</td>
+<td style="text-align:right;">
+64.1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Marksman
+</td>
+<td style="text-align:right;">
+65.0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Assassin
+</td>
+<td style="text-align:right;">
+68.1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Fighter
+</td>
+<td style="text-align:right;">
+71.1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Tank
+</td>
+<td style="text-align:right;">
+79.1
+</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code>Joined_Champions %&gt;% group_by(LoL.Class1) %&gt;% summarise(min.LoL.TotalArmor = min(LoL.TotalArmor)) %&gt;% 
+    arrange(min.LoL.TotalArmor) %&gt;% kbl() %&gt;% kable_styling(bootstrap_options = &quot;striped&quot;, 
+    full_width = F, position = &quot;center&quot;)</code></pre>
+<table class="table table-striped" style="width: auto !important; margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:left;">
+LoL.Class1
+</th>
+<th style="text-align:right;">
+min.LoL.TotalArmor
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+Mage
+</td>
+<td style="text-align:right;">
+48.72
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Assassin
+</td>
+<td style="text-align:right;">
+49.00
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Marksman
+</td>
+<td style="text-align:right;">
+52.00
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Fighter
+</td>
+<td style="text-align:right;">
+57.00
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Support
+</td>
+<td style="text-align:right;">
+58.00
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Tank
+</td>
+<td style="text-align:right;">
+66.10
+</td>
+</tr>
+</tbody>
+</table>
+<p>In TFT, the same rules apply as those in LoL in that Class1 is important in finding Champions that suit your teams needs. The Champion with the highest Hp is Aurelian Sol, a Starship. The Champion with the lowest Hp is Fiora, a Blademaster. When it comes to Armor in TFT, there are many Champions of various Classes with the same values resulting in no one Champion of Class having the max or min.</p>
+<pre class="r"><code>Joined_Champions %&gt;% summarise(max(TFT.Hp), min(TFT.Hp), max(TFT.TotalArmor), 
+    min(TFT.TotalArmor))</code></pre>
+<pre><code>##   max(TFT.Hp) min(TFT.Hp) max(TFT.TotalArmor) min(TFT.TotalArmor)
+## 1        1100         450                  40                  20</code></pre>
+<pre class="r"><code>Joined_Champions %&gt;% filter(TFT.Hp == max(TFT.Hp)) %&gt;% select(Champion)</code></pre>
+<pre><code>##      Champion
+## 1 AurelionSol</code></pre>
+<pre class="r"><code>Joined_Champions %&gt;% filter(TFT.Hp == min(TFT.Hp)) %&gt;% select(Champion)</code></pre>
+<pre><code>##   Champion
+## 1    Fiora</code></pre>
+<pre class="r"><code>Joined_Champions %&gt;% group_by(TFT.Class1) %&gt;% summarise(max.TFT.HP = max(TFT.Hp)) %&gt;% 
+    arrange(desc(max.TFT.HP)) %&gt;% kbl() %&gt;% kable_styling(bootstrap_options = &quot;striped&quot;, 
+    full_width = F, position = &quot;center&quot;)</code></pre>
+<table class="table table-striped" style="width: auto !important; margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:left;">
+TFT.Class1
+</th>
+<th style="text-align:right;">
+max.TFT.HP
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+Starship
+</td>
+<td style="text-align:right;">
+1100
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Brawler
+</td>
+<td style="text-align:right;">
+1000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Mercenary
+</td>
+<td style="text-align:right;">
+1000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Mana-Reaver
+</td>
+<td style="text-align:right;">
+950
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Infiltrato
+</td>
+<td style="text-align:right;">
+850
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Blademaster
+</td>
+<td style="text-align:right;">
+800
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Demolitionist
+</td>
+<td style="text-align:right;">
+800
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Mystic
+</td>
+<td style="text-align:right;">
+800
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Protector
+</td>
+<td style="text-align:right;">
+800
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Sorcerer
+</td>
+<td style="text-align:right;">
+750
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Vanguard
+</td>
+<td style="text-align:right;">
+750
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Blaster
+</td>
+<td style="text-align:right;">
+650
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Infiltrator
+</td>
+<td style="text-align:right;">
+650
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Sniper
+</td>
+<td style="text-align:right;">
+600
+</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code>Joined_Champions %&gt;% group_by(TFT.Class1) %&gt;% summarize(min.TFT.Hp = min(TFT.Hp)) %&gt;% 
+    arrange(min.TFT.Hp) %&gt;% kbl() %&gt;% kable_styling(bootstrap_options = &quot;striped&quot;, 
+    full_width = F, position = &quot;center&quot;)</code></pre>
+<table class="table table-striped" style="width: auto !important; margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:left;">
+TFT.Class1
+</th>
+<th style="text-align:right;">
+min.TFT.Hp
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+Blademaster
+</td>
+<td style="text-align:right;">
+450
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Blaster
+</td>
+<td style="text-align:right;">
+500
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Demolitionist
+</td>
+<td style="text-align:right;">
+500
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Infiltrator
+</td>
+<td style="text-align:right;">
+500
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Sniper
+</td>
+<td style="text-align:right;">
+500
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Sorcerer
+</td>
+<td style="text-align:right;">
+500
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Mystic
+</td>
+<td style="text-align:right;">
+550
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Protector
+</td>
+<td style="text-align:right;">
+600
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Vanguard
+</td>
+<td style="text-align:right;">
+600
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Brawler
+</td>
+<td style="text-align:right;">
+650
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Mana-Reaver
+</td>
+<td style="text-align:right;">
+750
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Mercenary
+</td>
+<td style="text-align:right;">
+800
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Infiltrato
+</td>
+<td style="text-align:right;">
+850
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Starship
+</td>
+<td style="text-align:right;">
+1100
+</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code>Joined_Champions %&gt;% group_by(TFT.Class1) %&gt;% summarize(max.TFT.TotalArmor = max(TFT.TotalArmor)) %&gt;% 
+    arrange(desc(max.TFT.TotalArmor)) %&gt;% kbl() %&gt;% kable_styling(bootstrap_options = &quot;striped&quot;, 
+    full_width = F, position = &quot;center&quot;)</code></pre>
+<table class="table table-striped" style="width: auto !important; margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:left;">
+TFT.Class1
+</th>
+<th style="text-align:right;">
+max.TFT.TotalArmor
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+Protector
+</td>
+<td style="text-align:right;">
+40
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Sorcerer
+</td>
+<td style="text-align:right;">
+40
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Vanguard
+</td>
+<td style="text-align:right;">
+40
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Blademaster
+</td>
+<td style="text-align:right;">
+35
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Blaster
+</td>
+<td style="text-align:right;">
+35
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Brawler
+</td>
+<td style="text-align:right;">
+35
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Demolitionist
+</td>
+<td style="text-align:right;">
+35
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Mana-Reaver
+</td>
+<td style="text-align:right;">
+35
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Starship
+</td>
+<td style="text-align:right;">
+35
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Infiltrato
+</td>
+<td style="text-align:right;">
+30
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Mercenary
+</td>
+<td style="text-align:right;">
+30
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Mystic
+</td>
+<td style="text-align:right;">
+30
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Infiltrator
+</td>
+<td style="text-align:right;">
+25
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Sniper
+</td>
+<td style="text-align:right;">
+20
+</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code>Joined_Champions %&gt;% group_by(TFT.Class1) %&gt;% summarise(min.TFT.TotalArmor = min(TFT.TotalArmor)) %&gt;% 
+    arrange(min.TFT.TotalArmor) %&gt;% kbl() %&gt;% kable_styling(bootstrap_options = &quot;striped&quot;, 
+    full_width = F, position = &quot;center&quot;)</code></pre>
+<table class="table table-striped" style="width: auto !important; margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:left;">
+TFT.Class1
+</th>
+<th style="text-align:right;">
+min.TFT.TotalArmor
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+Blademaster
+</td>
+<td style="text-align:right;">
+20
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Blaster
+</td>
+<td style="text-align:right;">
+20
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Brawler
+</td>
+<td style="text-align:right;">
+20
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Demolitionist
+</td>
+<td style="text-align:right;">
+20
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Infiltrator
+</td>
+<td style="text-align:right;">
+20
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Mercenary
+</td>
+<td style="text-align:right;">
+20
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Mystic
+</td>
+<td style="text-align:right;">
+20
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Sniper
+</td>
+<td style="text-align:right;">
+20
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Sorcerer
+</td>
+<td style="text-align:right;">
+20
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Infiltrato
+</td>
+<td style="text-align:right;">
+30
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Mana-Reaver
+</td>
+<td style="text-align:right;">
+30
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Protector
+</td>
+<td style="text-align:right;">
+35
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Starship
+</td>
+<td style="text-align:right;">
+35
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Vanguard
+</td>
+<td style="text-align:right;">
+40
+</td>
+</tr>
+</tbody>
+</table>
+<p><em>In order to find these values for both Lol and TFT, I used summarize max() and min() to find the values. To find the specific Champion I used filter to get only the observations with the specific value and selected for Champion to see who it belongs to. Finally to see the max() mins() for each class, I grouped the summary by Class1.</em></p>
+</div>
+<div id="summary-unique-ranges" class="section level3">
+<h3>Summary: Unique Ranges</h3>
+<p>The map in LoL is quite large in comparison to TFT as TFT’s map is similar to a chess board with hexes instead of squares. Range in LoL is measured in an arbitrary quantity called “units”. While Range in TFT is measured by the number of hexes between Champions. For both games, there are set Ranges for the Champions in the game (there are only a select number of ranges they may have). As a result of these different map qualities, TFT is limited to only have 5 different ranges while LoL can have 13. Then, after filtering by Marksman, which is a Class I know is associated with Range, I wanted to see how the Range stats were distributed.</p>
+<pre class="r"><code>Joined_Champions %&gt;% summarise(n_distinct(LoL.Range), n_distinct(TFT.Range))</code></pre>
+<pre><code>##   n_distinct(LoL.Range) n_distinct(TFT.Range)
+## 1                    13                     5</code></pre>
+<pre class="r"><code>Joined_Champions %&gt;% filter(LoL.Class1 == &quot;Marksman&quot;) %&gt;% select(Champion, 
+    LoL.Range) %&gt;% arrange(desc(LoL.Range)) %&gt;% kbl() %&gt;% kable_styling(bootstrap_options = &quot;striped&quot;, 
+    full_width = F, position = &quot;center&quot;)</code></pre>
+<table class="table table-striped" style="width: auto !important; margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:left;">
+Champion
+</th>
+<th style="text-align:right;">
+LoL.Range
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+Caitlyn
+</td>
+<td style="text-align:right;">
+650
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Ashe
+</td>
+<td style="text-align:right;">
+600
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Ezreal
+</td>
+<td style="text-align:right;">
+550
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Jhin
+</td>
+<td style="text-align:right;">
+550
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+MissFortune
+</td>
+<td style="text-align:right;">
+550
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Jinx
+</td>
+<td style="text-align:right;">
+525
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Kaisa
+</td>
+<td style="text-align:right;">
+525
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Xayah
+</td>
+<td style="text-align:right;">
+525
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Lucian
+</td>
+<td style="text-align:right;">
+500
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Graves
+</td>
+<td style="text-align:right;">
+425
+</td>
+</tr>
+</tbody>
+</table>
+<p><em>To find these values, I first did summarize(n.distinct()) to give me the number of unique values. Then to see how the Range was distributed in LoL Marksmans, I first filtered to the desired Class1 then selected for Champion and Range.</em></p>
+</div>
+<div id="summary-damage" class="section level3">
+<h3>Summary: Damage</h3>
+<pre class="r"><code>Joined_Champions %&gt;% summarise(quantile(LoL.Damage), quantile(TFT.Damage))</code></pre>
+<pre><code>##   quantile(LoL.Damage) quantile(TFT.Damage)
+## 1               47.000                   10
+## 2               54.104                   45
+## 3               60.000                   50
+## 4               63.000                   60
+## 5               69.000                   90</code></pre>
+<pre class="r"><code>Joined_Champions %&gt;% filter(TFT.Damage &gt; 60) %&gt;% group_by(TFT.Origin, 
+    TFT.Class1) %&gt;% summarize(mean.TFT.Damage = mean(TFT.Damage)) %&gt;% 
+    arrange(desc(mean.TFT.Damage)) %&gt;% kbl() %&gt;% kable_styling(bootstrap_options = &quot;striped&quot;, 
+    full_width = F, position = &quot;center&quot;)</code></pre>
+<table class="table table-striped" style="width: auto !important; margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:left;">
+TFT.Origin
+</th>
+<th style="text-align:left;">
+TFT.Class1
+</th>
+<th style="text-align:right;">
+mean.TFT.Damage
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+Dark Star
+</td>
+<td style="text-align:left;">
+Sniper
+</td>
+<td style="text-align:right;">
+90
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Cybernetic
+</td>
+<td style="text-align:left;">
+Mana-Reaver
+</td>
+<td style="text-align:right;">
+70
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Dark Star
+</td>
+<td style="text-align:left;">
+Infiltrator
+</td>
+<td style="text-align:right;">
+70
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Rebel
+</td>
+<td style="text-align:left;">
+Blaster
+</td>
+<td style="text-align:right;">
+70
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Rebel
+</td>
+<td style="text-align:left;">
+Brawler
+</td>
+<td style="text-align:right;">
+70
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Void
+</td>
+<td style="text-align:left;">
+Brawler
+</td>
+<td style="text-align:right;">
+70
+</td>
+</tr>
+</tbody>
+</table>
+<p><em>For both Damage and DPS, I used quantile() to just see the range/distribution of these stats. For Damage, I grouped by Origin and Class1 because I wanted to see which Origin/Class1 combos were in the 75% in TFT.Damage. This was done by filtering and using the condition of being in the 75 Percentile.</em></p>
+</div>
+<div id="summary-damage-per-second" class="section level3">
+<h3>Summary: Damage Per Second</h3>
+<p>Though the lowest base DPS for TFT was a lot lower than the lowest LoL DPS by about 21, the highest base DPS for TFT was higher than that of LoL by almost 35. This makes sense as TFT is a round-based game and certain Champions(considered to be stronger Champions) are not entered until later rounds.</p>
+<pre class="r"><code>Joined_Champions %&gt;% summarise(quantile(LoL.DamagePerSec), quantile(TFT.DamagePerSec))</code></pre>
+<pre><code>##   quantile(LoL.DamagePerSec) quantile(TFT.DamagePerSec)
+## 1                   29.18739                        8.0
+## 2                   34.66809                       31.5
+## 3                   37.66528                       35.0
+## 4                   41.08000                       44.5
+## 5                   46.92000                       81.0</code></pre>
+</div>
+<div id="summary-attack-speed" class="section level3">
+<h3>Summary: Attack Speed</h3>
+<p>TFT is a round based game so in the time of one LoL game many rounds take place. This is reflected in the mean Attack Speed for both games. Since TFT is a faster paced game, the average Attack Speed is higher.</p>
+<pre class="r"><code>Joined_Champions %&gt;% summarise(mean(LoL.AttackSpeed), mean(TFT.AttackSpeed))</code></pre>
+<pre><code>##   mean(LoL.AttackSpeed) mean(TFT.AttackSpeed)
+## 1             0.6439804             0.7303922</code></pre>
+<pre class="r"><code>Joined_Champions %&gt;% group_by(LoL.Class1) %&gt;% summarise(mean.LoL.AttackSpeed = mean(LoL.AttackSpeed)) %&gt;% 
+    arrange(desc(mean.LoL.AttackSpeed)) %&gt;% kbl() %&gt;% kable_styling(bootstrap_options = &quot;striped&quot;, 
+    full_width = F, position = &quot;center&quot;)</code></pre>
+<table class="table table-striped" style="width: auto !important; margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:left;">
+LoL.Class1
+</th>
+<th style="text-align:right;">
+mean.LoL.AttackSpeed
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+Assassin
+</td>
+<td style="text-align:right;">
+0.6711667
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Tank
+</td>
+<td style="text-align:right;">
+0.6635714
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Fighter
+</td>
+<td style="text-align:right;">
+0.6515455
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Mage
+</td>
+<td style="text-align:right;">
+0.6331667
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Support
+</td>
+<td style="text-align:right;">
+0.6308000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Marksman
+</td>
+<td style="text-align:right;">
+0.6252000
+</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code>Joined_Champions %&gt;% group_by(TFT.Class1) %&gt;% summarise(mean.TFT.AttackSpeed = mean(TFT.AttackSpeed)) %&gt;% 
+    arrange(desc(mean.TFT.AttackSpeed)) %&gt;% kbl() %&gt;% kable_styling(bootstrap_options = &quot;striped&quot;, 
+    full_width = F, position = &quot;center&quot;)</code></pre>
+<table class="table table-striped" style="width: auto !important; margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:left;">
+TFT.Class1
+</th>
+<th style="text-align:right;">
+mean.TFT.AttackSpeed
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+Mercenary
+</td>
+<td style="text-align:right;">
+1.0000000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Infiltrato
+</td>
+<td style="text-align:right;">
+0.9000000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Sniper
+</td>
+<td style="text-align:right;">
+0.8166667
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Blademaster
+</td>
+<td style="text-align:right;">
+0.8083333
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Starship
+</td>
+<td style="text-align:right;">
+0.8000000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Mana-Reaver
+</td>
+<td style="text-align:right;">
+0.7750000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Infiltrator
+</td>
+<td style="text-align:right;">
+0.7625000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Sorcerer
+</td>
+<td style="text-align:right;">
+0.7312500
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Mystic
+</td>
+<td style="text-align:right;">
+0.7125000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Demolitionist
+</td>
+<td style="text-align:right;">
+0.7000000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Blaster
+</td>
+<td style="text-align:right;">
+0.6750000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Protector
+</td>
+<td style="text-align:right;">
+0.6625000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Vanguard
+</td>
+<td style="text-align:right;">
+0.6000000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Brawler
+</td>
+<td style="text-align:right;">
+0.5625000
+</td>
+</tr>
+</tbody>
+</table>
+<p><em>After using mean() to find the average AttackSpeed for each game, I used group_by() to observe the average AttackSpeed for each Class which I thought might be influence each other.</em></p>
+</div>
+</div>
+<div id="visualizing-check-your-map-awareness" class="section level2">
+<h2>4. Visualizing: Check Your Map Awareness</h2>
+<div id="correlation-heatmap" class="section level3">
+<h3>Correlation Heatmap</h3>
+<p>The correlation heatmap helped to answer my purpose of this project, to see if the base stats of LoL influenced the base stats of TFT. It is also interesting to see correlation between the stats themselves. Looking at the heatmap, all base stats of TFT have a moderate to high positive correlation to the corresponding base stats of LoL. The highest correlation between the two games is that of the Ranges. Another interesting correlation is that for both TFT and LoL, Range and Total Armor had a strong negative correlation. It is interesting that in LoL, there is a decently high positve correlation between Damage and Total Armor but in TFT there is almost no effect.</p>
+<pre class="r"><code>corMatrix &lt;- Joined_Champions %&gt;% select_if(is.numeric) %&gt;% cor(use = &quot;pair&quot;)
+tidycor &lt;- corMatrix %&gt;% as.data.frame %&gt;% rownames_to_column(&quot;var1&quot;) %&gt;% 
+    pivot_longer(-1, names_to = &quot;var2&quot;, values_to = &quot;correlation&quot;)
+tidycor %&gt;% ggplot(aes(var1, var2, fill = correlation)) + geom_tile() + 
+    geom_text(aes(label = round(correlation, 2)), color = &quot;black&quot;, 
+        size = 3) + theme(axis.text.x = element_text(angle = 90, 
+    hjust = 1)) + scale_fill_gradient2(low = &quot;white&quot;, mid = &quot;light blue&quot;, 
+    high = &quot;blue&quot;) + ggtitle(&quot;Correlation Heatmap&quot;)</code></pre>
+<p><img src="../../project/project1_files/figure-html/unnamed-chunk-18-1.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+<div id="range-v-totalarmor-of-classes" class="section level3">
+<h3>Range v TotalArmor of Classes</h3>
+<div id="lol" class="section level4">
+<h4>LoL</h4>
+<p>Due to the strong correlation found in the correlation heatmap. I wanted to plot the Range and Total Armor of the Champions by Class1 to see if the correlation between Range and Total Armor was apparent in the way the Champions are put into Classes for both LoL and TFT. It appears to be true as each Class seems to be in specific areas of the graph. Mages, Marksman and most Supports tend to have high range but low TotalArmor. This is consistent with the how these Classes are typically the backline of the team. Meanwhile, the frontliners(Assassin and Fighters), are low ranged and mid to high Total Armor. If you typically fight in the front, you would want more armor and vice versa.</p>
+<pre class="r"><code>Joined_Champions %&gt;% ggplot(aes(LoL.Range, LoL.TotalArmor, color = LoL.Class1)) + 
+    geom_point() + ggtitle(&quot;Range v Total Armor of Classes in LoL&quot;) + 
+    xlab(&quot;Champion Range&quot;) + ylab(&quot;Champion Total Armor&quot;) + labs(color = &quot;Class&quot;)</code></pre>
+<p><img src="../../project/project1_files/figure-html/unnamed-chunk-19-1.png" width="672" style="display: block; margin: auto;" />
+#### TFT
+For TFT, the pattern of Range and Total Armor having a negative correlation is apparent just like in LoL as well as certain Classes having low ranges and high armor or high armor and low ranges. Although, the stats among Class1 are a bit more spread out than those in LoL. To see if the Origin, which is unique to TFT, might be the cause of this, I colored by Origin. However, there did not seem to be any pattern. The slight spread among Class may just be a choice or due to the fact that there are less options for Range in TFT.</p>
+<pre class="r"><code>Joined_Champions %&gt;% ggplot(aes(TFT.Range, TFT.TotalArmor, color = TFT.Origin)) + 
+    geom_point() + ggtitle(&quot;Range v Total Armor of Class1 in TFT&quot;) + 
+    xlab(&quot;Champion Range&quot;) + ylab(&quot;Champion Total Armor&quot;) + labs(color = &quot;Origin&quot;) + 
+    facet_wrap(~TFT.Class1)</code></pre>
+<p><img src="../../project/project1_files/figure-html/unnamed-chunk-20-1.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+</div>
+<div id="average-damage-of-classes" class="section level3">
+<h3>Average Damage of Classes</h3>
+<p>Once again, I wanted to see if I could find any patterns in how Origin may have been determined outside of just lore. This time I looked at the Average Damage for each Class1. This graph shows that some Origins have fewer Classes than others (Void and Valkyrie). In terms of Average Damage, the graph does not seem to show much. However, it is a bit difficult to tell, but it appears that the Dark Star Origin seems to have the Classes with the higher average Damage.</p>
+<pre class="r"><code>Joined_Champions %&gt;% ggplot(aes(x = TFT.Class1, fill = TFT.Class1)) + 
+    geom_bar(aes(y = TFT.Damage), stat = &quot;summary&quot;, fun = mean) + 
+    scale_y_continuous(breaks = seq(0, 100, 10)) + facet_wrap(~TFT.Origin, 
+    ncol = 4) + theme(axis.text.x = element_text(angle = 90, 
+    hjust = 1)) + ggtitle(&quot;Average Damage across Class1 and Origin in TFT&quot;) + 
+    xlab(&quot;Class1&quot;) + ylab(&quot;Average Damage&quot;) + labs(color = &quot;Class1&quot;)</code></pre>
+<p><img src="../../project/project1_files/figure-html/unnamed-chunk-21-1.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+</div>
+<div id="dimensionality-reduction-victory" class="section level2">
+<h2>5. Dimensionality Reduction: Victory</h2>
+<p>In the interest in of seeing how different stats group together, clustering could be a good way of observation. For the following clusters, I chose to look at how the stats with a relatively high correlation group together. I did not choose to see how DPS clusters with Damage or Attack Speed as it was a function of those two. However, I did what to see how Damage and Attack Speed themselves cluster together. I also only did these for LoL as TFT has set values (multiple share the exact number), there would be clusters for each individual number rather than a group.</p>
+<div id="range-and-total-armor" class="section level3">
+<h3>Range and Total Armor</h3>
+<div id="lol-1" class="section level4">
+<h4>LoL</h4>
+<p>For Range and Total Armor, there are two clusters. These clusters are a strong structure a seen from the average silhouette width being about 0.884. These two clusters show that Champions either have a high Range and low Total Armor or low Range and high Total Armor with no in between. The champions representing these clusters are Ezreal(a Marksman) and Shen (a Tank). This actually makes a lot sense as Marksmans and Tanks are known to be opposites.</p>
+<pre class="r"><code>library(cluster)
+pam_data &lt;- Joined_Champions %&gt;% select(LoL.Range, LoL.TotalArmor)
+sil_width &lt;- vector()
+for (i in 2:10) {
+    pam_fit &lt;- pam(pam_data, k = i)
+    sil_width[i] &lt;- pam_fit$silinfo$avg.width
+}
+ggplot() + geom_line(aes(x = 1:10, y = sil_width)) + scale_x_continuous(name = &quot;k&quot;, 
+    breaks = 1:10)</code></pre>
+<p><img src="../../project/project1_files/figure-html/unnamed-chunk-22-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>library(cluster)
+pam1 &lt;- Joined_Champions %&gt;% select(LoL.Range, LoL.TotalArmor) %&gt;% 
+    pam(k = 2)
+pamclust = Joined_Champions %&gt;% mutate(cluster = as.factor(pam1$clustering))
+pamclust %&gt;% ggplot(aes(LoL.Range, LoL.TotalArmor, color = cluster)) + 
+    geom_point()</code></pre>
+<p><img src="../../project/project1_files/figure-html/unnamed-chunk-23-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>pamclust %&gt;% group_by(cluster) %&gt;% select(cluster, LoL.Range, 
+    LoL.TotalArmor) %&gt;% summarize_if(is.numeric, mean, na.rm = T) %&gt;% 
+    kbl() %&gt;% kable_styling(bootstrap_options = &quot;striped&quot;, full_width = F, 
+    position = &quot;center&quot;)</code></pre>
+<table class="table table-striped" style="width: auto !important; margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:left;">
+cluster
+</th>
+<th style="text-align:right;">
+LoL.Range
+</th>
+<th style="text-align:right;">
+LoL.TotalArmor
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+1
+</td>
+<td style="text-align:right;">
+541.3462
+</td>
+<td style="text-align:right;">
+54.81454
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2
+</td>
+<td style="text-align:right;">
+151.0000
+</td>
+<td style="text-align:right;">
+65.04448
+</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code>Joined_Champions %&gt;% slice(pam1$id.med) %&gt;% select(Champion, 
+    LoL.Range, LoL.TotalArmor) %&gt;% kbl() %&gt;% kable_styling(bootstrap_options = &quot;striped&quot;, 
+    full_width = F, position = &quot;center&quot;)</code></pre>
+<table class="table table-striped" style="width: auto !important; margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:left;">
+Champion
+</th>
+<th style="text-align:right;">
+LoL.Range
+</th>
+<th style="text-align:right;">
+LoL.TotalArmor
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+Ezreal
+</td>
+<td style="text-align:right;">
+550
+</td>
+<td style="text-align:right;">
+52.0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Shen
+</td>
+<td style="text-align:right;">
+125
+</td>
+<td style="text-align:right;">
+66.1
+</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code>pam1$silinfo$avg.width %&gt;% kbl() %&gt;% kable_styling(bootstrap_options = &quot;striped&quot;, 
+    full_width = F, position = &quot;center&quot;)</code></pre>
+<table class="table table-striped" style="width: auto !important; margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:right;">
+x
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:right;">
+0.884915
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div id="damage-and-attack-speed" class="section level3">
+<h3>Damage and Attack Speed</h3>
+<div id="lol-2" class="section level4">
+<h4>LoL</h4>
+<pre class="r"><code>library(cluster)
+pam_data &lt;- Joined_Champions %&gt;% select(LoL.Damage, LoL.AttackSpeed)
+sil_width &lt;- vector()
+for (i in 2:10) {
+    pam_fit &lt;- pam(pam_data, k = i)
+    sil_width[i] &lt;- pam_fit$silinfo$avg.width
+}
+ggplot() + geom_line(aes(x = 1:10, y = sil_width)) + scale_x_continuous(name = &quot;k&quot;, 
+    breaks = 1:10)</code></pre>
+<p><img src="../../project/project1_files/figure-html/unnamed-chunk-24-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>library(cluster)
+pam1 &lt;- Joined_Champions %&gt;% select(LoL.Damage, LoL.AttackSpeed) %&gt;% 
+    pam(k = 9)
+pamclust = Joined_Champions %&gt;% mutate(cluster = as.factor(pam1$clustering))
+pamclust %&gt;% ggplot(aes(LoL.Damage, LoL.AttackSpeed, color = cluster)) + 
+    geom_point()</code></pre>
+<p><img src="../../project/project1_files/figure-html/unnamed-chunk-25-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>pamclust %&gt;% group_by(cluster) %&gt;% select(cluster, LoL.Damage, 
+    LoL.AttackSpeed) %&gt;% summarize_if(is.numeric, mean, na.rm = T) %&gt;% 
+    kbl() %&gt;% kable_styling(bootstrap_options = &quot;striped&quot;, full_width = F, 
+    position = &quot;center&quot;)</code></pre>
+<table class="table table-striped" style="width: auto !important; margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:left;">
+cluster
+</th>
+<th style="text-align:right;">
+LoL.Damage
+</th>
+<th style="text-align:right;">
+LoL.AttackSpeed
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+1
+</td>
+<td style="text-align:right;">
+54.20466
+</td>
+<td style="text-align:right;">
+0.6417778
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2
+</td>
+<td style="text-align:right;">
+49.29550
+</td>
+<td style="text-align:right;">
+0.6287500
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+3
+</td>
+<td style="text-align:right;">
+61.50143
+</td>
+<td style="text-align:right;">
+0.6577143
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+4
+</td>
+<td style="text-align:right;">
+58.11150
+</td>
+<td style="text-align:right;">
+0.6412500
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+5
+</td>
+<td style="text-align:right;">
+68.33333
+</td>
+<td style="text-align:right;">
+0.5966667
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+6
+</td>
+<td style="text-align:right;">
+64.00000
+</td>
+<td style="text-align:right;">
+0.6408000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+7
+</td>
+<td style="text-align:right;">
+60.00800
+</td>
+<td style="text-align:right;">
+0.6646000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+8
+</td>
+<td style="text-align:right;">
+63.00000
+</td>
+<td style="text-align:right;">
+0.6655000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+9
+</td>
+<td style="text-align:right;">
+66.00000
+</td>
+<td style="text-align:right;">
+0.6620000
+</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code>Joined_Champions %&gt;% slice(pam1$id.med) %&gt;% select(Champion, 
+    LoL.Damage, LoL.AttackSpeed) %&gt;% kbl() %&gt;% kable_styling(bootstrap_options = &quot;striped&quot;, 
+    full_width = F, position = &quot;center&quot;)</code></pre>
+<table class="table table-striped" style="width: auto !important; margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:left;">
+Champion
+</th>
+<th style="text-align:right;">
+LoL.Damage
+</th>
+<th style="text-align:right;">
+LoL.AttackSpeed
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+Jayce
+</td>
+<td style="text-align:right;">
+54.000
+</td>
+<td style="text-align:right;">
+0.658
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+TwistedFate
+</td>
+<td style="text-align:right;">
+49.954
+</td>
+<td style="text-align:right;">
+0.651
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Blitzcrank
+</td>
+<td style="text-align:right;">
+61.540
+</td>
+<td style="text-align:right;">
+0.625
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Fizz
+</td>
+<td style="text-align:right;">
+58.040
+</td>
+<td style="text-align:right;">
+0.658
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Fiora
+</td>
+<td style="text-align:right;">
+68.000
+</td>
+<td style="text-align:right;">
+0.690
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Lucian
+</td>
+<td style="text-align:right;">
+64.000
+</td>
+<td style="text-align:right;">
+0.638
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Xayah
+</td>
+<td style="text-align:right;">
+60.000
+</td>
+<td style="text-align:right;">
+0.625
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Irelia
+</td>
+<td style="text-align:right;">
+63.000
+</td>
+<td style="text-align:right;">
+0.656
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+XinZhao
+</td>
+<td style="text-align:right;">
+66.000
+</td>
+<td style="text-align:right;">
+0.645
+</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code>pam1$silinfo$avg.width %&gt;% kbl() %&gt;% kable_styling(bootstrap_options = &quot;striped&quot;, 
+    full_width = F, position = &quot;center&quot;)</code></pre>
+<table class="table table-striped" style="width: auto !important; margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:right;">
+x
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:right;">
+0.7036615
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div id="damage-and-total-armor" class="section level3">
+<h3>Damage and Total Armor</h3>
+<p>Damage and Total Armor has 2 clusters. This is a relatively strong structure with an average silhouette width of 0.539. This clustering makes sense in that typically Champions are considered to have one of two roles: Damage Dealers and Damage Takers. When looking at the Champions that best represent these clusters, we have Syndra, a Mage, and JarvinIV, a Tank. This is consistent with the common knowledge in league that Mages are considered to be the best Damage Dealers while Tanks are considered the best defense as they are Damage Takers.</p>
+<pre class="r"><code>library(cluster)
+pam_data &lt;- Joined_Champions %&gt;% select(LoL.Damage, LoL.TotalArmor)
+sil_width &lt;- vector()
+for (i in 2:10) {
+    pam_fit &lt;- pam(pam_data, k = i)
+    sil_width[i] &lt;- pam_fit$silinfo$avg.width
+}
+ggplot() + geom_line(aes(x = 1:10, y = sil_width)) + scale_x_continuous(name = &quot;k&quot;, 
+    breaks = 1:10)</code></pre>
+<p><img src="../../project/project1_files/figure-html/unnamed-chunk-26-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>library(cluster)
+pam1 &lt;- Joined_Champions %&gt;% select(LoL.Damage, LoL.TotalArmor) %&gt;% 
+    pam(k = 2)
+pamclust = Joined_Champions %&gt;% mutate(cluster = as.factor(pam1$clustering))
+pamclust %&gt;% ggplot(aes(LoL.Damage, LoL.TotalArmor, color = cluster)) + 
+    geom_point()</code></pre>
+<p><img src="../../project/project1_files/figure-html/unnamed-chunk-27-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>pamclust %&gt;% group_by(cluster) %&gt;% select(cluster, LoL.Damage, 
+    LoL.TotalArmor) %&gt;% summarize_if(is.numeric, mean, na.rm = T) %&gt;% 
+    kbl() %&gt;% kable_styling(bootstrap_options = &quot;striped&quot;, full_width = F, 
+    position = &quot;center&quot;)</code></pre>
+<table class="table table-striped" style="width: auto !important; margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:left;">
+cluster
+</th>
+<th style="text-align:right;">
+LoL.Damage
+</th>
+<th style="text-align:right;">
+LoL.TotalArmor
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+1
+</td>
+<td style="text-align:right;">
+54.44807
+</td>
+<td style="text-align:right;">
+54.24778
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2
+</td>
+<td style="text-align:right;">
+63.18958
+</td>
+<td style="text-align:right;">
+66.10833
+</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code>Joined_Champions %&gt;% slice(pam1$id.med) %&gt;% select(Champion, 
+    LoL.Damage, LoL.TotalArmor) %&gt;% kbl() %&gt;% kable_styling(bootstrap_options = &quot;striped&quot;, 
+    full_width = F, position = &quot;center&quot;)</code></pre>
+<table class="table table-striped" style="width: auto !important; margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:left;">
+Champion
+</th>
+<th style="text-align:right;">
+LoL.Damage
+</th>
+<th style="text-align:right;">
+LoL.TotalArmor
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+Syndra
+</td>
+<td style="text-align:right;">
+53.872
+</td>
+<td style="text-align:right;">
+54.712
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+JarvanIV
+</td>
+<td style="text-align:right;">
+64.000
+</td>
+<td style="text-align:right;">
+66.100
+</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code>pam1$silinfo$avg.width %&gt;% kbl() %&gt;% kable_styling(bootstrap_options = &quot;striped&quot;, 
+    full_width = F, position = &quot;center&quot;)</code></pre>
+<table class="table table-striped" style="width: auto !important; margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:right;">
+x
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:right;">
+0.538965
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+
+            
+        <hr>         <div class="related-posts">
+                <h5>Related Posts</h5>
+                
+              </div> 
+            </div>
+          </div>
+
+   <hr>  <div class="disqus">
+  <div id="disqus_thread"></div>
+  <script type="text/javascript">
+
+    (function() {
+      
+      
+      if (window.location.hostname == "localhost")
+        return;
+
+      var disqus_shortname = '';
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+  </script>
+  <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+  <a href="http://disqus.com/" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div> 
+        </div>
+      </div>
+    </div>
+
+    
+    <footer>
+  <div id="footer">
+    <div class="container">
+      <p class="text-muted">&copy; All rights reserved. Powered by <a href="https://gohugo.io/">Hugo</a> and
+      <a href="http://www.github.com/nurlansu/hugo-sustain/">sustain</a> with ♥</p>
+    </div>
+  </div>
+</footer>
+<div class="footer"></div>
+
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+<script src="../../js/docs.min.js"></script>
+<script src="../../js/main.js"></script>
+
+<script src="../../js/ie10-viewport-bug-workaround.js"></script>
+
+
+    
+  </body>
+</html>
